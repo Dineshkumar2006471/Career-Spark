@@ -4,7 +4,7 @@ It calls Google's Gemini API using the official google-genai SDK for roadmap, ch
 """
 from google import genai
 import asyncio
-from google.api_core.exceptions import ResourceExhausted, TooManyRequests
+
 
 from config import get_settings
 
