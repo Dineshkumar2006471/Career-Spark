@@ -12,7 +12,7 @@ Many students finish high school without a clear understanding of what career su
 ## ✨ Core Features
 
 - **🧠 Career Assessment Engine:** An AI-powered multi-step questionnaire that evaluates your interests, strengths, and working style to recommend the top career paths.
-- **🗺️ AI-Generated Roadmap:** Get a personalized step-by-step roadmap broken down into Foundation, Intermediate, and Job-Ready phases (Powered by NVIDIA NIM - Llama 3.1 70B).
+- **🗺️ AI-Generated Roadmap:** Get a personalized step-by-step roadmap broken down into Foundation, Intermediate, and Job-Ready phases (Powered by Google Gemini AI).
 - **🎯 Skill Gap Analyzer:** Compare your current skills against industry requirements to see exactly what you need to learn.
 - **📜 Certifications & Courses Tracker:** Discover recognized, mostly free certifications and courses (Coursera, NPTEL, etc.) tailored to your missing skills.
 - **💼 Real-time Internship Discovery:** Live internship listings fetched via Adzuna and Remotive APIs, curated for beginners and freshers.
@@ -34,7 +34,7 @@ Many students finish high school without a clear understanding of what career su
 - **Deployment:** Render
 
 ### APIs & Integrations
-- **AI Models:** NVIDIA NIM (Llama 3.1 70B)
+- **AI Models:** Google Gemini (Gemini 2.5 Flash)
 - **Job Boards:** Adzuna API, Remotive API
 - **Developer Profiles:** GitHub REST API, Codeforces API, LeetCode GraphQL
 
@@ -89,7 +89,8 @@ VITE_BACKEND_URL=http://localhost:8000
 
 **Backend (`backend/.env`)**
 ```env
-NVIDIA_API_KEY=your_nvidia_nim_api_key
+VERTEX_PROJECT_ID=your_google_cloud_project_id
+VERTEX_LOCATION=us-central1
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_SERVICE_KEY=your_supabase_service_role_key
 ADZUNA_APP_ID=your_adzuna_app_id
@@ -97,7 +98,71 @@ ADZUNA_APP_KEY=your_adzuna_api_key
 GITHUB_TOKEN=optional_for_higher_rate_limits
 ```
 
-## 📂 Project Structure
+## 🔄 Application Workflow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant AI as Gemini AI
+    participant DB as Supabase
+
+    User->>Frontend: Signs up / Logs in
+    Frontend->>DB: Authenticates User
+    User->>Frontend: Completes Career Assessment
+    Frontend->>Backend: Sends Assessment Data
+    Backend->>AI: Requests Career Path Match
+    AI-->>Backend: Returns Best Matches
+    Backend-->>Frontend: Displays Recommended Paths
+    User->>Frontend: Selects Target Role
+    Frontend->>Backend: Requests Personalized Roadmap
+    Backend->>AI: Prompts for Roadmap & Skill Gaps
+    AI-->>Backend: Returns JSON Roadmap
+    Backend->>DB: Saves Roadmap & Skills to Profile
+    Backend-->>Frontend: Renders Dashboard (Roadmap, Skills)
+    User->>Frontend: Uploads Resume PDF
+    Frontend->>Backend: Sends PDF for Analysis
+    Backend->>AI: Extracts text & requests feedback
+    AI-->>Backend: Returns Resume Action Items
+    Backend-->>Frontend: Displays Feedback on Dashboard
+```
+
+## 📂 Project Structure & Architecture
+
+```mermaid
+graph TD
+    Client[Client Browser]
+    
+    subgraph Frontend [Frontend (React + Vite)]
+        UI[UI Components & Pages]
+        State[React Context / State]
+        API_Client[API Client]
+    end
+    
+    subgraph Backend [Backend (FastAPI)]
+        Routers[API Routers]
+        Services[Business Logic & AI Services]
+        Models[Pydantic Schemas]
+    end
+    
+    subgraph External [External Services]
+        Supabase[(Supabase PostgreSQL & Auth)]
+        Gemini[Google Gemini AI]
+        Jobs[Job APIs Adzuna/Remotive]
+    end
+    
+    Client -->|Interacts with| Frontend
+    UI <--> State
+    State <--> API_Client
+    API_Client <-->|REST API via Axios/Fetch| Routers
+    Routers <--> Services
+    Services <--> Models
+    Services <-->|Queries Data| Supabase
+    Services <-->|Prompts & Analysis| Gemini
+    Services <-->|Fetches Internships| Jobs
+    Frontend <-->|Direct Auth| Supabase
+```
 
 ```text
 Career-Spark/
