@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 class ChatRequest(BaseModel):
     message: str
     context: str | None = None
+    history: list[dict] = Field(default_factory=list)
 
 
 class ChatResponse(BaseModel):
@@ -20,16 +21,30 @@ class RoadmapRequest(BaseModel):
     goal_note: str | None = None
 
 
+class RoadmapResource(BaseModel):
+    title: str
+    provider: str
+    url: str
+
+
+class DetailedSkill(BaseModel):
+    skill_name: str
+    summary: str
+    courses: list[RoadmapResource] = Field(default_factory=list)
+    certifications: list[RoadmapResource] = Field(default_factory=list)
+
+
+class StepByStepAction(BaseModel):
+    timeframe: str
+    action: str
+
+
 class RoadmapPhase(BaseModel):
     title: str
     timeline: str
-    skills: list[str]
     outcome: str
-    focus_areas: list[str] = Field(default_factory=list)
-    courses: list[dict[str, str]] = Field(default_factory=list)
-    certifications: list[dict[str, str]] = Field(default_factory=list)
-    internships: list[dict[str, str]] = Field(default_factory=list)
-    weekly_actions: list[str] = Field(default_factory=list)
+    detailed_skills: list[DetailedSkill] = Field(default_factory=list)
+    step_by_step_plan: list[StepByStepAction] = Field(default_factory=list)
     proof_outputs: list[str] = Field(default_factory=list)
 
 
@@ -87,6 +102,11 @@ class ResumeAnalyzeResponse(BaseModel):
     score: int
     suggestions: list[str]
     extracted_text: str | None = None
+    extracted_skills: list[str] = Field(default_factory=list)
+    extracted_projects: list[str] = Field(default_factory=list)
+    extracted_education: list[str] = Field(default_factory=list)
+    extracted_experience: list[str] = Field(default_factory=list)
+    profile_summary: str = ""
 
 
 class InterviewFeedbackRequest(BaseModel):
@@ -96,3 +116,44 @@ class InterviewFeedbackRequest(BaseModel):
 
 class InterviewFeedbackResponse(BaseModel):
     feedback: str
+
+
+class SkillGap(BaseModel):
+    skill: str
+    current: int
+    target: int
+    gap: int
+    priority: str
+    reason: str
+
+
+class ResourceItem(BaseModel):
+    title: str
+    provider: str
+    type: str
+    price: str
+    reason: str
+    url: str
+    skill: str | None = None
+    logo: str | None = None
+
+
+class DashboardAnalysisRequest(BaseModel):
+    target_role: str
+    profile_skills: list[str] = Field(default_factory=list)
+    projects: list[str] = Field(default_factory=list)
+    experience: list[str] = Field(default_factory=list)
+    resume_score: int | None = None
+    goal_note: str | None = None
+
+
+class DashboardAnalysisResponse(BaseModel):
+    targetRole: str
+    readinessScore: int
+    resumeScore: int | None = None
+    gaps: list[SkillGap]
+    strongestSignals: list[str]
+    riskSignals: list[str]
+    nextActions: list[str]
+    courses: list[ResourceItem]
+    simulations: list[ResourceItem]

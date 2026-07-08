@@ -36,6 +36,19 @@ export function getTargetRole(profile, roadmap, fallbackPath) {
   return 'Entry Level Internship'
 }
 
+export function buildDashboardPayload(profile, roadmap, resumes) {
+  const fallbackPath = JSON.parse(localStorage.getItem('careerspark_path') || 'null') || { title: 'Frontend Development' }
+  const targetRole = getTargetRole(profile, roadmap, fallbackPath)
+  return {
+    target_role: targetRole,
+    profile_skills: profile?.skills || [],
+    projects: profile?.projects || [],
+    experience: profile?.experience_items || [],
+    resume_score: resumes?.[0]?.ats_score || null,
+    goal_note: profile?.goal_note || ""
+  }
+}
+
 export function getTargetSkills(targetRole, profileSkills = []) {
   const role = targetRole.toLowerCase()
   if (role.includes('data')) return roleSkillMap.data
@@ -43,7 +56,13 @@ export function getTargetSkills(targetRole, profileSkills = []) {
   if (role.includes('backend')) return roleSkillMap.backend
   if (role.includes('design') || role.includes('ui') || role.includes('ux')) return roleSkillMap.design
   if (role.includes('frontend') || role.includes('front-end') || role.includes('react')) return roleSkillMap.frontend
-  return [...new Set([...roleSkillMap.frontend.slice(0, 5), ...asArray(profileSkills).slice(0, 4)])]
+  
+  // If it's a custom role like "Freelancer", use their profile skills and some general tech skills
+  const baseSkills = asArray(profileSkills)
+  if (baseSkills.length > 0) return [...new Set(baseSkills)]
+  
+  // Ultimate fallback
+  return ['Communication', 'Problem Solving', 'Project Management', 'Client Relations']
 }
 
 export function buildSkillGaps(profile, skillRows, targetRole) {
@@ -122,34 +141,47 @@ export function buildLearningResources(targetRole, gaps) {
     const query = slug(`${gap.skill} ${targetRole}`)
     return [
       {
-        title: `${gap.skill} role course search`,
-        provider: 'SWAYAM',
-        type: 'Official courses',
-        price: 'Free/low cost',
+        title: `Google Career Certificates: ${gap.skill}`,
+        provider: 'Google',
+        type: 'Official Certification',
+        price: 'Free audit / Coursera',
         reason: gap.reason,
-        url: `https://swayam.gov.in/explorer?searchText=${query}`,
+        url: `https://grow.google/certificates/`,
         skill: gap.skill,
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg'
       },
       {
-        title: `${gap.skill} guided projects`,
-        provider: 'freeCodeCamp',
-        type: 'Practice',
+        title: `Microsoft Learn: ${gap.skill} Path`,
+        provider: 'Microsoft Learn',
+        type: 'Official Path',
         price: 'Free',
         reason: `Build proof for ${gap.skill}`,
-        url: `https://www.freecodecamp.org/search?query=${query}`,
+        url: `https://learn.microsoft.com/en-us/search/?terms=${slug(gap.skill)}`,
         skill: gap.skill,
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg'
       },
       {
-        title: `${targetRole} professional course`,
-        provider: 'Coursera',
-        type: 'Course catalog',
-        price: 'Free audit/paid certificate',
-        reason: `Structured learning for ${targetRole}`,
-        url: `https://www.coursera.org/search?query=${query}`,
+        title: `AWS Skill Builder: ${gap.skill}`,
+        provider: 'AWS',
+        type: 'Official Training',
+        price: 'Free tiers available',
+        reason: `Industry standard training for ${gap.skill}`,
+        url: `https://explore.skillbuilder.aws/learn/catalog?q=${slug(gap.skill)}`,
         skill: gap.skill,
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg'
       },
+      {
+        title: `Udemy Masterclass: ${gap.skill}`,
+        provider: 'Udemy',
+        type: 'Premium Course',
+        price: 'Paid',
+        reason: `Deep dive into ${gap.skill}`,
+        url: `https://www.udemy.com/courses/search/?src=ukw&q=${slug(gap.skill)}`,
+        skill: gap.skill,
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e3/Udemy_logo.svg'
+      }
     ]
-  })
+  }).slice(0, 9)
 }
 
 export function buildSimulationResources(targetRole) {

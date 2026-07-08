@@ -79,3 +79,22 @@ export async function analyzeResumeFile(file, targetRole = 'Frontend Development
 export function getInterviewFeedback(payload) {
   return requestJson('/interview/feedback', { method: 'POST', body: JSON.stringify(payload) })
 }
+
+let analysisCachePromise = null
+let analysisCachePayloadStr = null
+
+// Calls POST /analysis/dashboard with full profile data and returns a personalized dynamic AI dashboard analysis.
+export function fetchDashboardAnalysis(payload) {
+  const payloadStr = JSON.stringify(payload)
+  if (analysisCachePromise && analysisCachePayloadStr === payloadStr) {
+    return analysisCachePromise
+  }
+  
+  analysisCachePayloadStr = payloadStr
+  analysisCachePromise = requestJson('/analysis/dashboard', { method: 'POST', body: payloadStr }).catch((err) => {
+    analysisCachePromise = null // Clear cache on error so it can be retried
+    throw err
+  })
+  
+  return analysisCachePromise
+}

@@ -11,8 +11,17 @@ import { loadProfile } from '../../services/supabaseData.js'
 import { clearOnboardingComplete } from '../../services/onboardingState.js'
 
 function getInitials(profile, user) {
-  const first = profile?.first_name?.trim()?.[0]
-  const last = profile?.last_name?.trim()?.[0]
+  let first = profile?.first_name?.trim()?.[0]
+  let last = profile?.last_name?.trim()?.[0]
+  
+  if (!first && user?.user_metadata?.full_name) {
+    const parts = user.user_metadata.full_name.split(' ')
+    first = parts[0]?.[0]
+    if (parts.length > 1) {
+      last = parts[parts.length - 1]?.[0]
+    }
+  }
+  
   const email = user?.email?.trim()?.[0]
   return `${first || email || 'U'}${last || ''}`.toUpperCase()
 }
@@ -39,8 +48,9 @@ function UserNavMenu({ className = '' }) {
 
   const displayName = useMemo(() => {
     const name = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()
-    return name || auth?.user?.email || 'Student'
-  }, [auth?.user?.email, profile?.first_name, profile?.last_name])
+    const googleName = auth?.user?.user_metadata?.full_name
+    return name || googleName || auth?.user?.email || 'Student'
+  }, [auth?.user, profile?.first_name, profile?.last_name])
 
   async function handleLogout() {
     if (auth?.user?.id) clearOnboardingComplete(auth.user.id)

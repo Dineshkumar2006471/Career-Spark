@@ -80,6 +80,7 @@ function ProfileWizard() {
   const [form, setForm] = useState(initialForm)
   const [location, setLocation] = useState([20.5937, 78.9629])
   const [message, setMessage] = useState('')
+  const [detecting, setDetecting] = useState(false)
   const [resumeStatus, setResumeStatus] = useState('')
   const [loading, setLoading] = useState(false)
   const [profileLoading, setProfileLoading] = useState(true)
@@ -145,11 +146,40 @@ function ProfileWizard() {
     setForm((current) => ({ ...current, [field]: value }))
   }
 
-  // Reads browser geolocation and returns the selected latitude/longitude.
+  // Reads browser geolocation and reverse-geocodes it to populate form fields.
   function detectLocation() {
-    navigator.geolocation?.getCurrentPosition((position) => {
-      setLocation([position.coords.latitude, position.coords.longitude])
-    })
+    setDetecting(true)
+    navigator.geolocation?.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude
+        const lon = position.coords.longitude
+        setLocation([lat, lon])
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+          const data = await res.json()
+          if (data?.address) {
+            const city = data.address.city || data.address.town || data.address.village || ''
+            const state = data.address.state || ''
+            setForm((current) => ({
+              ...current,
+              city: city || current.city,
+              state: state || current.state,
+              fullAddress: data.display_name || current.fullAddress
+            }))
+          }
+        } catch (error) {
+          console.error('Reverse geocoding failed', error)
+        } finally {
+          setDetecting(false)
+        }
+      },
+      (error) => {
+        console.error('Geolocation failed:', error)
+        setDetecting(false)
+        alert('Could not detect location. Please check your browser permissions.')
+      },
+      { timeout: 10000 }
+    )
   }
 
   // Accepts the uploaded resume and processes analysis in the background.
@@ -245,8 +275,12 @@ function ProfileWizard() {
                 <Field label="State" onChange={(value) => updateField('state', value)} value={form.state} />
                 <Field label="Location label" onChange={(value) => updateField('locationLabel', value)} value={form.locationLabel} />
               </div>
-              <button className="h-11 rounded-md border border-hairline px-lg text-sm font-medium text-ink hover:bg-surface-soft" onClick={detectLocation} type="button">
-                Use browser location
+              <button className="h-11 flex items-center justify-center gap-2 rounded-md border border-hairline px-lg text-sm font-medium text-ink hover:bg-surface-soft disabled:opacity-50" onClick={detectLocation} disabled={detecting} type="button">
+                {detecting ? (
+                  <><span className="h-4 w-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></span> Detecting...</>
+                ) : (
+                  'Use browser location'
+                )}
               </button>
               <div className="h-72 overflow-hidden rounded-lg border border-hairline">
                 <MapContainer center={location} className="h-full w-full" key={location.join(',')} zoom={6}>

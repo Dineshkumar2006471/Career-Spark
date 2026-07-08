@@ -107,7 +107,18 @@ export function saveRoadmapChoice(path, phases = []) {
 // Loads roadmap rows and returns the newest roadmap or null.
 export async function loadRoadmap() {
   const rows = await selectOwned('roadmap')
-  return rows[0] || null
+  const roadmap = rows[0] || null
+
+  // Auto-purge legacy roadmaps that lack detailed_skills so users can generate new ones.
+  if (roadmap && roadmap.phases && roadmap.phases.length > 0 && !roadmap.phases[0].detailed_skills) {
+    const user = await getCurrentUser()
+    if (user) {
+      await supabase.from('roadmap').delete().eq('user_id', user.id)
+      return null
+    }
+  }
+
+  return roadmap
 }
 
 // Upserts skill progress rows and returns the saved rows.
@@ -194,9 +205,10 @@ export async function saveInterviewSession(prompt, transcript, feedback) {
 export async function subscribeToUserTable(table, onChange) {
   const user = await getCurrentUser()
   if (!supabase || !user) return () => {}
+  const channelId = `${table}-${user.id}-${Math.random().toString(36).substring(2, 9)}`
   const channel = supabase
-    .channel(`${table}-${user.id}`)
+    .channel(channelId)
     .on('postgres_changes', { event: '*', schema: 'public', table, filter: `user_id=eq.${user.id}` }, onChange)
-    .subscribe()
+  channel.subscribe()
   return () => supabase.removeChannel(channel)
 }

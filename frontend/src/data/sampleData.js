@@ -32,77 +32,90 @@ export const careerPaths = [
 
 export const roadmapPhases = [
   {
-    title: 'Foundation: role fundamentals',
+    title: 'Month 1: Foundation and Role Fundamentals',
     timeline: 'Weeks 1-4',
-    skills: ['HTML/CSS', 'JavaScript basics', 'Git/GitHub', 'Responsive layouts'],
     outcome: 'Ship a polished personal portfolio and two small UI projects that prove beginner frontend readiness.',
-    focus_areas: ['Map entry-level frontend job descriptions', 'Practice layout and JavaScript fundamentals daily', 'Publish every project with clear README notes'],
-    courses: [
-      { title: 'Responsive Web Design', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/learn/2022/responsive-web-design/' },
-      { title: 'HTML, CSS, and JavaScript for Web Developers', provider: 'Coursera', url: 'https://www.coursera.org/learn/html-css-javascript-for-web-developers' },
+    detailed_skills: [
+      {
+        skill_name: 'Core role concepts',
+        summary: 'Understand the fundamental terminology, HTML/CSS layout structures, and tools for Frontend Development.',
+        courses: [
+          { title: 'Responsive Web Design', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/learn/2022/responsive-web-design/' }
+        ],
+        certifications: [
+          { title: 'Responsive Web Design Certification', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/learn/2022/responsive-web-design/' }
+        ]
+      },
+      {
+        skill_name: 'Git & Version Control',
+        summary: 'Learn to manage code and collaborate with others using Git and GitHub.',
+        courses: [
+          { title: 'Git for Beginners', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/' }
+        ],
+        certifications: []
+      }
     ],
-    certifications: [
-      { title: 'Responsive Web Design Certification', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/learn/2022/responsive-web-design/' },
+    step_by_step_plan: [
+      { timeframe: 'Week 1', action: 'Audit target roles and list missing frontend skills.' },
+      { timeframe: 'Week 2', action: 'Complete layout exercises and publish a personal homepage.' },
+      { timeframe: 'Week 3', action: 'Build a JavaScript mini project with form or API behavior.' },
+      { timeframe: 'Week 4', action: 'Convert both projects into resume-ready bullets.' }
     ],
-    internships: [
-      { title: 'AICTE beginner internship search', provider: 'AICTE Internship Portal', url: 'https://internship.aicte-india.org/' },
-    ],
-    weekly_actions: [
-      'Week 1: audit target roles and list missing frontend skills.',
-      'Week 2: complete layout exercises and publish a personal homepage.',
-      'Week 3: build a JavaScript mini project with form or API behavior.',
-      'Week 4: convert both projects into resume-ready bullets.',
-    ],
-    proof_outputs: ['Portfolio homepage', 'Two GitHub repositories', 'Resume project bullets'],
+    proof_outputs: ['Portfolio homepage', 'Two GitHub repositories', 'Resume project bullets']
   },
   {
-    title: 'Build proof: React and product workflows',
+    title: 'Month 2: Build proof with React',
     timeline: 'Weeks 5-8',
-    skills: ['React components', 'APIs', 'State management', 'Accessibility'],
     outcome: 'Build a dashboard project that consumes real API data and demonstrates maintainable frontend thinking.',
-    focus_areas: ['Convert static UI into reusable React components', 'Use real API states: loading, empty, and error', 'Explain accessibility and state-management decisions'],
-    courses: [
-      { title: 'Front End Development Libraries', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/learn/front-end-development-libraries/' },
-      { title: 'Forage technology simulations', provider: 'Forage', url: 'https://www.theforage.com/simulations?query=frontend' },
+    detailed_skills: [
+      {
+        skill_name: 'React and APIs',
+        summary: 'Convert static UI into reusable React components and use real API states.',
+        courses: [
+          { title: 'Front End Development Libraries', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/learn/front-end-development-libraries/' }
+        ],
+        certifications: [
+          { title: 'Front End Development Libraries Certification', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/learn/front-end-development-libraries/' }
+        ]
+      },
+      {
+        skill_name: 'Accessibility and Simulation',
+        summary: 'Explain accessibility and state-management decisions through job simulations.',
+        courses: [
+          { title: 'Forage technology simulations', provider: 'Forage', url: 'https://www.theforage.com/simulations?query=frontend' }
+        ],
+        certifications: []
+      }
     ],
-    certifications: [
-      { title: 'Front End Development Libraries Certification', provider: 'freeCodeCamp', url: 'https://www.freecodecamp.org/learn/front-end-development-libraries/' },
+    step_by_step_plan: [
+      { timeframe: 'Week 5', action: 'Scope a dashboard with data, filters, and responsive layout.' },
+      { timeframe: 'Week 6', action: 'Implement API integration with loading and error states.' },
+      { timeframe: 'Week 7', action: 'Complete one job simulation or guided frontend project.' },
+      { timeframe: 'Week 8', action: 'Polish README, screenshots, deployment link, and portfolio story.' }
     ],
-    internships: [
-      { title: 'Forage virtual job simulations', provider: 'Forage', url: 'https://www.theforage.com/simulations?query=frontend' },
-      { title: 'SWAYAM Plus internships', provider: 'SWAYAM Plus', url: 'https://swayam-plus.swayam2.ac.in/internship' },
-    ],
-    weekly_actions: [
-      'Week 5: scope a dashboard with data, filters, and responsive layout.',
-      'Week 6: implement API integration with loading and error states.',
-      'Week 7: complete one job simulation or guided frontend project.',
-      'Week 8: polish README, screenshots, deployment link, and portfolio story.',
-    ],
-    proof_outputs: ['React dashboard deployment', 'Simulation completion proof', 'Portfolio case study'],
+    proof_outputs: ['React dashboard deployment', 'Simulation completion proof', 'Portfolio case study']
   },
   {
-    title: 'Apply: shortlist-ready execution',
+    title: 'Month 3: Apply and Shortlist',
     timeline: 'Weeks 9-12',
-    skills: ['Testing', 'Performance', 'Resume stories', 'Interview practice'],
     outcome: 'Apply to internships with a project-backed resume, interview stories, and a tracked follow-up rhythm.',
-    focus_areas: ['Target beginner-friendly frontend roles', 'Customize resume bullets for each application', 'Practice explaining project tradeoffs aloud'],
-    courses: [
-      { title: 'Mock interview practice', provider: 'CareerSpark', url: '/dashboard/interview' },
+    detailed_skills: [
+      {
+        skill_name: 'Resume Stories and Interviews',
+        summary: 'Target beginner-friendly frontend roles and practice explaining project tradeoffs aloud.',
+        courses: [
+          { title: 'Mock interview practice', provider: 'CareerSpark', url: '/dashboard/interview' }
+        ],
+        certifications: []
+      }
     ],
-    certifications: [
-      { title: 'Finish the highest-signal certificate from earlier phases', provider: 'Selected provider', url: 'https://www.coursera.org/search?query=frontend%20certificate' },
+    step_by_step_plan: [
+      { timeframe: 'Week 9', action: 'Shortlist 15 internships and map each requirement to proof.' },
+      { timeframe: 'Week 10', action: 'Apply to 5 roles and track application status.' },
+      { timeframe: 'Week 11', action: 'Run mock interviews and refine weak answers.' },
+      { timeframe: 'Week 12', action: 'Follow up, improve resume from feedback, and repeat applications.' }
     ],
-    internships: [
-      { title: 'Live frontend internships', provider: 'CareerSpark / Adzuna', url: '/dashboard/internships' },
-      { title: 'Official AICTE internships', provider: 'AICTE Internship Portal', url: 'https://internship.aicte-india.org/' },
-    ],
-    weekly_actions: [
-      'Week 9: shortlist 15 internships and map each requirement to proof.',
-      'Week 10: apply to 5 roles and track application status.',
-      'Week 11: run mock interviews and refine weak answers.',
-      'Week 12: follow up, improve resume from feedback, and repeat applications.',
-    ],
-    proof_outputs: ['Targeted resume', 'Application tracker', 'Mock interview feedback', 'Follow-up message templates'],
+    proof_outputs: ['Targeted resume', 'Application tracker', 'Mock interview feedback', 'Follow-up message templates']
   },
 ]
 

@@ -7,7 +7,7 @@
 function getScoreColor(score) {
   if (score > 70) return 'text-success'
   if (score >= 40) return 'text-warning'
-  return 'text-hairline'
+  return 'text-error'
 }
 
 // Renders a radial progress gauge and returns a labeled career match summary.

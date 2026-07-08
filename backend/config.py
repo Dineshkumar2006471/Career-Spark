@@ -12,7 +12,8 @@ load_dotenv()
 
 @dataclass(frozen=True)
 class Settings:
-    nvidia_api_key: str | None
+    vertex_project_id: str | None
+    vertex_location: str | None
     supabase_url: str | None
     supabase_service_key: str | None
     adzuna_app_id: str | None
@@ -23,7 +24,8 @@ class Settings:
 # Loads backend environment variables and returns immutable settings for services.
 def get_settings() -> Settings:
     return Settings(
-        nvidia_api_key=os.getenv("NVIDIA_API_KEY"),  # NVIDIA NIM key for Llama 3.1 roadmap and chatbot calls.
+        vertex_project_id=os.getenv("VERTEX_PROJECT_ID"),  # GCP Project ID for Vertex AI.
+        vertex_location=os.getenv("VERTEX_LOCATION"),      # GCP Location for Vertex AI (e.g. us-central1).
         supabase_url=os.getenv("SUPABASE_URL"),  # Supabase project URL for server-side database access.
         supabase_service_key=os.getenv("SUPABASE_SERVICE_KEY"),  # Supabase service role key for trusted backend-only operations.
         adzuna_app_id=os.getenv("ADZUNA_APP_ID"),  # Adzuna application ID for internship search requests.

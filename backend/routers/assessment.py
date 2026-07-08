@@ -8,7 +8,7 @@ import re
 from fastapi import APIRouter
 
 from models.schemas import AssessmentAnalyzeRequest, AssessmentAnalyzeResponse, CareerPathMatch
-from services.nvidia_nim import complete_chat
+from services.gemini_ai import complete_chat
 
 router = APIRouter(prefix="/assessment", tags=["assessment"])
 
@@ -33,7 +33,7 @@ def parse_assessment_matches(content: str) -> list[CareerPathMatch]:
         return FALLBACK_MATCHES
 
 
-# Calls NVIDIA NIM to rank career paths and returns three structured matches.
+# Calls Gemini AI to rank career paths and returns three structured matches.
 @router.post("/analyze", response_model=AssessmentAnalyzeResponse)
 async def analyze_assessment(request: AssessmentAnalyzeRequest) -> AssessmentAnalyzeResponse:
     fallback = json.dumps({"results": [item.model_dump() for item in FALLBACK_MATCHES]})

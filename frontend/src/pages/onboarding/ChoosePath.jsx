@@ -7,7 +7,8 @@ import Button from '../../components/ui/Button.jsx'
 import { careerPaths } from '../../data/sampleData.js'
 import { useState } from 'react'
 import { roadmapPhases } from '../../data/sampleData.js'
-import { saveRoadmapChoice, saveSkillProgress } from '../../services/supabaseData.js'
+import { saveRoadmapChoice, saveSkillProgress, loadProfile } from '../../services/supabaseData.js'
+import { generateRoadmap } from '../../services/apiClient.js'
 import { skills } from '../../data/sampleData.js'
 import PublicNav from '../../components/layout/PublicNav.jsx'
 
@@ -16,17 +17,39 @@ function ChoosePath() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState(careerPaths[0].id)
 
+  const [isGenerating, setIsGenerating] = useState(false)
+
   // Stores the chosen path and returns to dashboard.
   async function saveChoice() {
+    setIsGenerating(true)
     const path = careerPaths.find((item) => item.id === selected)
     localStorage.setItem('careerspark_path', JSON.stringify(path))
     try {
-      await saveRoadmapChoice(path, roadmapPhases)
+      const profile = await loadProfile()
+      const payload = {
+        career_path: path.title,
+        current_skills: profile?.skills || [],
+        goal_note: profile?.goal_note || ''
+      }
+      
+      let phasesToSave = roadmapPhases
+      try {
+        const aiResponse = await generateRoadmap(payload)
+        if (aiResponse && aiResponse.phases) {
+          phasesToSave = aiResponse.phases
+        }
+      } catch (aiError) {
+        console.error("AI Roadmap generation failed, falling back to default:", aiError)
+      }
+
+      await saveRoadmapChoice(path, phasesToSave)
       await saveSkillProgress(skills)
     } catch (error) {
       localStorage.setItem('careerspark_save_choice_error', error.message)
+    } finally {
+      setIsGenerating(false)
+      navigate('/dashboard')
     }
-    navigate('/dashboard')
   }
 
   return (
@@ -44,7 +67,9 @@ function ChoosePath() {
           ))}
         </div>
         <div className="mt-xl flex justify-end">
-          <Button onClick={saveChoice}>Go to dashboard</Button>
+          <Button onClick={saveChoice} disabled={isGenerating}>
+            {isGenerating ? 'Generating Your Custom Roadmap...' : 'Go to dashboard'}
+          </Button>
         </div>
       </section>
     </main>
