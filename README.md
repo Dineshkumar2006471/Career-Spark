@@ -132,24 +132,24 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    Client[Client Browser]
+    Client["Client Browser"]
     
-    subgraph Frontend [Frontend (React + Vite)]
-        UI[UI Components & Pages]
-        State[React Context / State]
-        API_Client[API Client]
+    subgraph Frontend ["Frontend (React + Vite)"]
+        UI["UI Components & Pages"]
+        State["React Context / State"]
+        API_Client["API Client"]
     end
     
-    subgraph Backend [Backend (FastAPI)]
-        Routers[API Routers]
-        Services[Business Logic & AI Services]
-        Models[Pydantic Schemas]
+    subgraph Backend ["Backend (FastAPI)"]
+        Routers["API Routers"]
+        Services["Business Logic & AI Services"]
+        Models["Pydantic Schemas"]
     end
     
-    subgraph External [External Services]
-        Supabase[(Supabase PostgreSQL & Auth)]
-        Gemini[Google Gemini AI]
-        Jobs[Job APIs Adzuna/Remotive]
+    subgraph External ["External Services"]
+        Supabase[("Supabase PostgreSQL & Auth")]
+        Gemini["Google Gemini AI"]
+        Jobs["Job APIs Adzuna/Remotive"]
     end
     
     Client -->|Interacts with| Frontend
