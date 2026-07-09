@@ -1,6 +1,7 @@
 """
 Roadmap API router.
-It generates career roadmap text through NVIDIA NIM with deterministic fallback phases.
+Generates a deeply personalized career roadmap using Vertex AI that accounts
+for the student's EXISTING skills and builds ONLY around the gaps.
 """
 import json
 import re
@@ -11,6 +12,19 @@ from models.schemas import RoadmapPhase, RoadmapRequest, RoadmapResponse
 from services.gemini_ai import complete_chat
 
 router = APIRouter(prefix="/roadmap", tags=["roadmap"])
+
+
+# === SYSTEM INSTRUCTION ===
+ROADMAP_SYSTEM_INSTRUCTION = """You are a career development director at a top Indian university who has guided 5,000+ students into technology roles across India and globally.
+
+Your roadmap methodology:
+- You NEVER generate generic roadmaps. Every phase is customized to the student's current skill level.
+- You first identify what the student ALREADY knows, then build the roadmap ONLY around the gaps.
+- You suggest courses from REAL platforms with WORKING URLs: SWAYAM, Coursera, Udemy, freeCodeCamp, edX, Microsoft Learn, Google Skillshop, AWS Skill Builder, IBM SkillsBuild.
+- You include Indian-specific resources (SWAYAM, NPTEL, Internshala, AICTE portals) whenever relevant.
+- Each phase has concrete proof outputs that a recruiter can verify.
+- You always respond with valid JSON matching the requested schema.
+"""
 
 
 def build_fallback_phases(career_path: str) -> list[RoadmapPhase]:
@@ -117,32 +131,66 @@ def parse_roadmap_phases(content: str) -> list[RoadmapPhase] | None:
         return None
 
 
-# Calls NVIDIA NIM for roadmap guidance and returns structured phases for UI rendering.
+# Calls Vertex AI for roadmap guidance and returns structured phases for UI rendering.
 @router.post("/generate", response_model=RoadmapResponse)
 async def generate_roadmap(request: RoadmapRequest) -> RoadmapResponse:
     fallback_phases = build_fallback_phases(request.career_path)
     fallback = json.dumps({"phases": [phase.model_dump() for phase in fallback_phases]})
-    prompt = (
-        "Return ONLY valid JSON with key phases. Create a highly detailed 2-3 month step-by-step roadmap for a beginner student. "
-        "The roadmap must be broken down into monthly programs (e.g., 'Month 1', 'Month 2'). "
-        "Each phase object must include: title (e.g. Month 1: Foundation), timeline (e.g. Weeks 1-4), outcome, "
-        "detailed_skills (an array of skill objects), step_by_step_plan (an array of action objects), and proof_outputs (an array of strings). "
-        "Each object in detailed_skills must have: skill_name, summary, courses (array of objects with title, provider, url), and certifications (array of objects with title, provider, url). "
-        "Each object in step_by_step_plan must have: timeframe (e.g. Week 1, Day 1-3) and action. "
-        "CRITICAL: The content MUST NOT be generic. You MUST specifically mention the exact programming languages, tools, frameworks, and real-world projects relevant to the requested Career path. Do not use placeholder terms like 'learn fundamentals' without specifying what those fundamentals are for the role.\n"
-        "Prefer official or reliable platforms such as SWAYAM, SWAYAM Plus, AICTE Internship Portal, Forage, freeCodeCamp, Coursera, edX, Microsoft Learn, Google Skillshop, AWS Skill Builder, or IBM SkillsBuild when relevant. "
-        "The roadmap must be extremely detailed, actionable, and strictly tailored, helping the student move from beginner level to the target role.\n"
-        f"Career path: {request.career_path}. Current skills: {request.current_skills}. Goal note: {request.goal_note or 'none'}."
-    )
+
+    prompt = f"""Generate a highly detailed, personalized 3-month career roadmap for the target career below.
+
+<student_profile>
+TARGET CAREER: {request.career_path}
+CURRENT SKILLS THE STUDENT ALREADY HAS: {', '.join(request.current_skills) if request.current_skills else 'NONE — complete beginner'}
+STUDENT'S GOAL NOTE: {request.goal_note or 'No specific goal provided'}
+</student_profile>
+
+<gap_analysis_instructions>
+BEFORE building the roadmap, you MUST:
+1. List the top 10 skills required for "{request.career_path}".
+2. Check which of those skills the student ALREADY has from their current_skills list.
+3. Identify the GAPS — skills the student is MISSING.
+4. Build the roadmap ONLY around the gaps. Do NOT teach skills the student already knows.
+5. If the student already knows a skill, skip it or mention it briefly as "already covered" in the first phase.
+</gap_analysis_instructions>
+
+<roadmap_rules>
+- Create exactly 3 phases (Month 1, Month 2, Month 3).
+- Each phase MUST include:
+  - `title`: e.g., "Month 1: Core Python & Data Fundamentals"
+  - `timeline`: e.g., "Weeks 1-4"
+  - `outcome`: What the student can prove after this phase.
+  - `detailed_skills`: Array of skill objects. Each skill object has:
+    - `skill_name`: The exact skill (e.g., "TensorFlow", not "ML framework")
+    - `summary`: 1-2 sentences explaining what to learn and why
+    - `courses`: Array of real courses with `title`, `provider`, and working `url`
+    - `certifications`: Array of relevant certifications with `title`, `provider`, and `url`
+  - `step_by_step_plan`: Array of weekly actions with `timeframe` and `action`
+  - `proof_outputs`: Array of tangible deliverables the student creates
+
+- CRITICAL: Use REAL course URLs. Examples:
+  - https://www.coursera.org/search?query=Deep+Learning
+  - https://swayam.gov.in/explorer?searchText=Python
+  - https://www.udemy.com/courses/search/?q=React
+  - https://www.freecodecamp.org/learn/
+  - https://learn.microsoft.com/en-us/training/browse/?terms=Azure
+  
+- CRITICAL: Be SPECIFIC about technologies. Never say "learn fundamentals" — say "Learn Python pandas for data manipulation, focus on DataFrame operations, groupby, and merge."
+</roadmap_rules>
+
+Return ONLY valid JSON with a top-level key "phases" containing the array of phase objects."""
+
     content = await complete_chat(
-        [{"role": "user", "content": prompt}],
-        fallback,
+        messages=[{"role": "user", "content": prompt}],
+        fallback=fallback,
+        tools=None,
+        system_instruction=ROADMAP_SYSTEM_INSTRUCTION,
     )
     parsed_phases = parse_roadmap_phases(content)
-    used_provider = bool(parsed_phases) and content != fallback and "AI provider note:" not in content
+    used_provider = bool(parsed_phases) and content != fallback
     phases = parsed_phases or fallback_phases
     return RoadmapResponse(
         career_path=request.career_path,
         phases=phases,
-        provider_status="nvidia" if used_provider else "fallback",
+        provider_status="vertex-ai" if used_provider else "fallback",
     )
