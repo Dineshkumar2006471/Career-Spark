@@ -9,7 +9,7 @@ import MatchCompass from '../../components/ui/MatchCompass.jsx'
 import { careerPaths, roadmapPhases } from '../../data/sampleData.js'
 import { loadCertifications, loadLatestAssessment, loadProfile, loadResumeVersions, loadRoadmap, loadSkillProgress, subscribeToUserTable } from '../../services/supabaseData.js'
 import { fetchDashboardAnalysis } from '../../services/apiClient.js'
-import { getTargetRole, buildDashboardPayload } from '../../services/careerAnalysis.js'
+import { getTargetRole, buildDashboardPayload, buildHiringAnalysis } from '../../services/careerAnalysis.js'
 
 // Reads the selected career path and returns a safe fallback path.
 function getSelectedPath() {
@@ -90,7 +90,17 @@ function Home() {
         setAnalysis(aiAnalysis)
         localStorage.setItem('careerspark_dashboard_analysis', JSON.stringify(aiAnalysis))
       } catch (err) {
-        console.error("AI Analysis failed:", err)
+        console.error("AI Analysis failed, using local fallback:", err)
+        // Build local fallback from profile data
+        const fallbackPath = JSON.parse(localStorage.getItem('careerspark_path') || 'null') || careerPaths[0]
+        const localAnalysis = buildHiringAnalysis({
+          profile: prof,
+          roadmap: rdmp,
+          resumeRows: resumes,
+          skillRows: skills,
+          fallbackPath,
+        })
+        setAnalysis(localAnalysis)
       } finally {
         setIsAnalyzing(false)
       }

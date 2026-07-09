@@ -6,7 +6,7 @@ import { Trophy, ChevronRight, Zap, Target, Wrench, ArrowRight } from 'lucide-re
 import { useEffect, useState } from 'react'
 import { fetchDashboardAnalysis } from '../../services/apiClient.js'
 import { loadProfile, loadResumeVersions, loadRoadmap, loadSkillProgress, saveSkillProgress } from '../../services/supabaseData.js'
-import { getTargetSkills, buildDashboardPayload } from '../../services/careerAnalysis.js'
+import { getTargetSkills, getTargetRole, buildDashboardPayload, buildSkillGaps, buildLearningResources, buildHiringAnalysis } from '../../services/careerAnalysis.js'
 import { Link } from 'react-router-dom'
 
 // Renders skill gaps and returns prioritized learning recommendations.
@@ -32,7 +32,14 @@ function Skills() {
         const aiAnalysis = await fetchDashboardAnalysis(buildDashboardPayload(prof, rdmp, resumes))
         setAnalysis(aiAnalysis)
       } catch (err) {
-        console.error("AI Analysis failed:", err)
+        console.error("AI Analysis failed, using local fallback:", err)
+        // Build local fallback analysis from profile data
+        const fallbackPath = JSON.parse(localStorage.getItem('careerspark_path') || 'null') || { title: 'Frontend Development' }
+        const targetRole = getTargetRole(prof, rdmp, fallbackPath)
+        const gaps = buildSkillGaps(prof, skills, targetRole)
+        const courses = buildLearningResources(targetRole, gaps)
+        const localAnalysis = buildHiringAnalysis({ profile: prof, roadmap: rdmp, resumeRows: resumes, skillRows: skills, fallbackPath })
+        setAnalysis({ ...localAnalysis, courses })
       } finally {
         setIsAnalyzing(false)
       }
@@ -46,7 +53,7 @@ function Skills() {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-amber-500/20 border-t-amber-500"></div>
-        <p className="animate-pulse font-display text-sm font-semibold text-muted">Gemini AI is analyzing your skill gaps...</p>
+        <p className="animate-pulse font-display text-sm font-semibold text-muted">Analyzing your skill gaps...</p>
       </div>
     )
   }
@@ -55,12 +62,12 @@ function Skills() {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
         <p className="font-display text-lg font-semibold text-red-500">Failed to analyze skill gaps.</p>
-        <p className="text-sm text-muted">Please check your Vertex AI integration or try again later.</p>
+        <p className="text-sm text-muted">Please check your profile data or try again later.</p>
       </div>
     )
   }
 
-  const resources = analysis.courses.slice(0, 9)
+  const resources = analysis.courses?.slice(0, 9) || []
 
   return (
     <div className="space-y-xl">
@@ -78,7 +85,7 @@ function Skills() {
 
       {/* Skills List */}
       <section className="grid gap-base lg:grid-cols-2">
-        {analysis.gaps.map((item) => {
+        {(analysis.gaps || []).map((item) => {
           const label = item.skill
           const current = item.current
           const target = item.target
@@ -114,35 +121,37 @@ function Skills() {
       </section>
 
       {/* Direct Links */}
-      <section className="rounded-2xl border border-hairline bg-canvas p-xl shadow-sm">
-        <div className="flex items-center gap-sm mb-lg">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-600"><Zap size={20} /></div>
-          <h2 className="font-display text-xl font-bold">Dynamic AI Recommended Courses</h2>
-        </div>
-        <div className="grid gap-base md:grid-cols-2 lg:grid-cols-3">
-          {resources.map((resource) => (
-            <a className="group rounded-xl border border-hairline bg-canvas p-base hover:border-primary/30 hover:shadow-md transition-all flex flex-col h-full" href={resource.url} key={`${resource.provider}-${resource.skill || resource.title}`} rel="noreferrer" target="_blank">
-              <div className="flex justify-between items-start mb-sm">
-                <div className="flex items-center gap-2">
-                  {resource.logo && <img src={resource.logo} alt={resource.provider} className="h-5 w-5 object-contain" />}
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted bg-surface-soft px-2 py-1 rounded-md">{resource.provider}</span>
+      {resources.length > 0 && (
+        <section className="rounded-2xl border border-hairline bg-canvas p-xl shadow-sm">
+          <div className="flex items-center gap-sm mb-lg">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-600"><Zap size={20} /></div>
+            <h2 className="font-display text-xl font-bold">Recommended Courses</h2>
+          </div>
+          <div className="grid gap-base md:grid-cols-2 lg:grid-cols-3">
+            {resources.map((resource) => (
+              <a className="group rounded-xl border border-hairline bg-canvas p-base hover:border-primary/30 hover:shadow-md transition-all flex flex-col h-full" href={resource.url} key={`${resource.provider}-${resource.skill || resource.title}`} rel="noreferrer" target="_blank">
+                <div className="flex justify-between items-start mb-sm">
+                  <div className="flex items-center gap-2">
+                    {resource.logo && <img src={resource.logo} alt={resource.provider} className="h-5 w-5 object-contain" />}
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted bg-surface-soft px-2 py-1 rounded-md">{resource.provider}</span>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2 py-1 rounded-md">{resource.price}</span>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2 py-1 rounded-md">{resource.price}</span>
-              </div>
-              <h3 className="font-display font-bold text-ink mb-2">{resource.title}</h3>
-              <p className="text-sm leading-relaxed text-body flex-1">{resource.reason}</p>
-              <div className="mt-4 pt-3 border-t border-hairline flex items-center gap-1 text-xs font-semibold text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
-                Start Learning <ArrowRight size={14} />
-              </div>
-            </a>
-          ))}
-        </div>
-        <div className="mt-lg flex justify-center">
-          <Link className="inline-flex h-11 items-center gap-sm rounded-xl border border-hairline bg-surface-soft px-6 text-sm font-semibold text-ink hover:bg-canvas shadow-sm transition-all" to="/dashboard/courses">
-            View All Courses <ArrowRight size={16} />
-          </Link>
-        </div>
-      </section>
+                <h3 className="font-display font-bold text-ink mb-2">{resource.title}</h3>
+                <p className="text-sm leading-relaxed text-body flex-1">{resource.reason}</p>
+                <div className="mt-4 pt-3 border-t border-hairline flex items-center gap-1 text-xs font-semibold text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                  Start Learning <ArrowRight size={14} />
+                </div>
+              </a>
+            ))}
+          </div>
+          <div className="mt-lg flex justify-center">
+            <Link className="inline-flex h-11 items-center gap-sm rounded-xl border border-hairline bg-surface-soft px-6 text-sm font-semibold text-ink hover:bg-canvas shadow-sm transition-all" to="/dashboard/courses">
+              View All Courses <ArrowRight size={16} />
+            </Link>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

@@ -45,7 +45,8 @@ async def generate_text(prompt: str, fallback: str, temperature: float = 0.3) ->
                 if attempt < max_retries - 1:
                     await asyncio.sleep(base_delay * (2 ** attempt))
                     continue
-            return f"{fallback} AI provider note: {exc}"
+            print(f"Gemini generate_text error (attempt {attempt + 1}): {exc}")
+            return fallback
     return fallback
 
 
@@ -101,8 +102,10 @@ async def complete_chat(messages: list[dict[str, str]], fallback: str, tools: li
                     if attempt < max_retries - 1:
                         await asyncio.sleep(base_delay * (2 ** attempt))
                         continue
-                return f"{fallback} AI provider note: {exc}"
+                print(f"Gemini complete_chat error (attempt {attempt + 1}): {exc}")
+                return fallback
                 
         return fallback
     except Exception as exc:
-        return f"{fallback} AI provider note: {exc}"
+        print(f"Gemini complete_chat outer error: {exc}")
+        return fallback

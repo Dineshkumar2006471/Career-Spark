@@ -9,6 +9,17 @@ const roleSkillMap = {
   cloud: ['Linux', 'Networking', 'AWS', 'Troubleshooting', 'Security basics', 'Documentation'],
   backend: ['Python', 'APIs', 'Databases', 'Authentication', 'Testing', 'Deployment'],
   design: ['Figma', 'UX research', 'Wireframes', 'Prototyping', 'Design systems'],
+  ai: ['Python', 'Machine Learning', 'Deep Learning', 'TensorFlow/PyTorch', 'Math & Statistics', 'NLP', 'Data Preprocessing', 'Model Deployment'],
+  ml: ['Python', 'Machine Learning', 'Deep Learning', 'TensorFlow/PyTorch', 'Math & Statistics', 'NLP', 'Data Preprocessing', 'Model Deployment'],
+  devops: ['Linux', 'Docker', 'Kubernetes', 'CI/CD', 'AWS/GCP', 'Terraform', 'Monitoring', 'Scripting'],
+  mobile: ['React Native', 'Flutter', 'Swift/Kotlin', 'Mobile UI', 'App Store Deployment', 'APIs', 'Testing'],
+  fullstack: ['HTML/CSS', 'JavaScript', 'React', 'Node.js', 'Databases', 'APIs', 'Git', 'Deployment'],
+  cybersecurity: ['Networking', 'Linux', 'Cryptography', 'Penetration Testing', 'SIEM', 'Security Frameworks', 'Incident Response'],
+  product: ['User Research', 'Roadmapping', 'Agile/Scrum', 'Data Analytics', 'Wireframing', 'Stakeholder Management', 'A/B Testing'],
+  marketing: ['SEO', 'Content Strategy', 'Analytics', 'Social Media', 'Email Marketing', 'Copywriting', 'Campaign Management'],
+  blockchain: ['Solidity', 'Smart Contracts', 'Web3.js', 'Cryptography', 'DeFi', 'Ethereum', 'Security Auditing'],
+  game: ['Unity/Unreal', 'C#/C++', 'Game Physics', '3D Modeling', 'Shaders', 'Game Design', 'Version Control'],
+  embedded: ['C/C++', 'Microcontrollers', 'RTOS', 'PCB Design', 'Communication Protocols', 'Debugging', 'Sensors'],
 }
 
 function clean(value) {
@@ -51,13 +62,24 @@ export function buildDashboardPayload(profile, roadmap, resumes) {
 
 export function getTargetSkills(targetRole, profileSkills = []) {
   const role = targetRole.toLowerCase()
+  if (role.includes('ai') || role.includes('artificial intelligence')) return roleSkillMap.ai
+  if (role.includes('machine learning') || role.includes('ml engineer')) return roleSkillMap.ml
   if (role.includes('data')) return roleSkillMap.data
   if (role.includes('cloud')) return roleSkillMap.cloud
-  if (role.includes('backend')) return roleSkillMap.backend
+  if (role.includes('devops') || role.includes('sre') || role.includes('infrastructure')) return roleSkillMap.devops
+  if (role.includes('mobile') || role.includes('android') || role.includes('ios') || role.includes('flutter')) return roleSkillMap.mobile
+  if (role.includes('fullstack') || role.includes('full stack') || role.includes('full-stack')) return roleSkillMap.fullstack
+  if (role.includes('backend') || role.includes('back-end') || role.includes('back end')) return roleSkillMap.backend
   if (role.includes('design') || role.includes('ui') || role.includes('ux')) return roleSkillMap.design
   if (role.includes('frontend') || role.includes('front-end') || role.includes('react')) return roleSkillMap.frontend
+  if (role.includes('cyber') || role.includes('security') || role.includes('infosec')) return roleSkillMap.cybersecurity
+  if (role.includes('product manager') || role.includes('product management')) return roleSkillMap.product
+  if (role.includes('marketing') || role.includes('growth')) return roleSkillMap.marketing
+  if (role.includes('blockchain') || role.includes('web3') || role.includes('crypto')) return roleSkillMap.blockchain
+  if (role.includes('game') || role.includes('unity') || role.includes('unreal')) return roleSkillMap.game
+  if (role.includes('embedded') || role.includes('iot') || role.includes('firmware')) return roleSkillMap.embedded
   
-  // If it's a custom role like "Freelancer", use their profile skills and some general tech skills
+  // If it's a custom role, use their profile skills and some general tech skills
   const baseSkills = asArray(profileSkills)
   if (baseSkills.length > 0) return [...new Set(baseSkills)]
   
