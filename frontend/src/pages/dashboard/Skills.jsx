@@ -32,14 +32,8 @@ function Skills() {
         const aiAnalysis = await fetchDashboardAnalysis(buildDashboardPayload(prof, rdmp, resumes))
         setAnalysis(aiAnalysis)
       } catch (err) {
-        console.error("AI Analysis failed, using local fallback:", err)
-        // Build local fallback analysis from profile data
-        const fallbackPath = JSON.parse(localStorage.getItem('careerspark_path') || 'null') || { title: 'Frontend Development' }
-        const targetRole = getTargetRole(prof, rdmp, fallbackPath)
-        const gaps = buildSkillGaps(prof, skills, targetRole)
-        const courses = buildLearningResources(targetRole, gaps)
-        const localAnalysis = buildHiringAnalysis({ profile: prof, roadmap: rdmp, resumeRows: resumes, skillRows: skills, fallbackPath })
-        setAnalysis({ ...localAnalysis, courses })
+        console.error("AI Analysis failed:", err)
+        setAnalysis({ error: err.message || "AI Reasoning Engine is currently unavailable." })
       } finally {
         setIsAnalyzing(false)
       }
@@ -58,11 +52,11 @@ function Skills() {
     )
   }
 
-  if (!analysis) {
+  if (!analysis || analysis.error) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
         <p className="font-display text-lg font-semibold text-red-500">Failed to analyze skill gaps.</p>
-        <p className="text-sm text-muted">Please check your profile data or try again later.</p>
+        <p className="text-sm text-muted">{analysis?.error || 'Please check your profile data or try again later.'}</p>
       </div>
     )
   }

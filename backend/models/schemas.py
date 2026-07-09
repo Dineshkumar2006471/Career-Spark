@@ -145,6 +145,9 @@ class DashboardAnalysisRequest(BaseModel):
     experience: list[str] = Field(default_factory=list)
     resume_score: int | None = None
     goal_note: str | None = None
+    location: str | None = None
+    college: str | None = None
+    degree: str | None = None
 
 
 class DashboardAnalysisResponse(BaseModel):

@@ -50,13 +50,19 @@ export function getTargetRole(profile, roadmap, fallbackPath) {
 export function buildDashboardPayload(profile, roadmap, resumes) {
   const fallbackPath = JSON.parse(localStorage.getItem('careerspark_path') || 'null') || { title: 'Frontend Development' }
   const targetRole = getTargetRole(profile, roadmap, fallbackPath)
+  
+  const loc = [profile?.city, profile?.state].filter(Boolean).join(', ')
+  
   return {
     target_role: targetRole,
     profile_skills: profile?.skills || [],
     projects: profile?.projects || [],
     experience: profile?.experience_items || [],
     resume_score: resumes?.[0]?.ats_score || null,
-    goal_note: profile?.goal_note || ""
+    goal_note: profile?.goal_note || "",
+    location: loc || null,
+    college: profile?.institution || null,
+    degree: profile?.current_course ? `${profile.current_course}${profile.branch ? ` in ${profile.branch}` : ''}` : null
   }
 }
 

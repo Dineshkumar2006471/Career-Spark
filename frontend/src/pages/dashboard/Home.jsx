@@ -90,17 +90,9 @@ function Home() {
         setAnalysis(aiAnalysis)
         localStorage.setItem('careerspark_dashboard_analysis', JSON.stringify(aiAnalysis))
       } catch (err) {
-        console.error("AI Analysis failed, using local fallback:", err)
-        // Build local fallback from profile data
-        const fallbackPath = JSON.parse(localStorage.getItem('careerspark_path') || 'null') || careerPaths[0]
-        const localAnalysis = buildHiringAnalysis({
-          profile: prof,
-          roadmap: rdmp,
-          resumeRows: resumes,
-          skillRows: skills,
-          fallbackPath,
-        })
-        setAnalysis(localAnalysis)
+        console.error("AI Analysis failed:", err)
+        // If AI is unavailable, we don't fall back to mock data. We just let the UI show an error state.
+        setAnalysis({ error: err.message || "AI Reasoning Engine is currently unavailable." })
       } finally {
         setIsAnalyzing(false)
       }
@@ -117,8 +109,8 @@ function Home() {
     return () => unsubscribe()
   }, [])
 
-  const completedSkills = analysis ? analysis.gaps.filter((item) => item.current >= item.target).length : 0
-  const totalSkills = analysis ? analysis.gaps.length : 0
+  const completedSkills = (analysis?.gaps || []).filter((item) => item.current >= item.target).length
+  const totalSkills = analysis?.gaps?.length || 0
   const roadmapProgress = (roadmap?.progress_percent ?? Math.round((completedSkills / Math.max(1, totalSkills)) * 100)) || 0
   const completedCertifications = certifications.filter((item) => item.status === 'completed').length
   const applicationCount = Array.isArray(profile?.applications) ? profile.applications.length : 0
@@ -263,6 +255,14 @@ function Home() {
           </div>
         </section>
       ) : null}
+      
+      {/* AI Error Notification Overlay (if failed) */}
+      {analysis?.error && (
+        <div className="fixed bottom-4 right-4 max-w-sm bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl shadow-lg z-50">
+          <h4 className="font-bold mb-1">AI Reasoning Error</h4>
+          <p className="text-sm">{analysis.error}</p>
+        </div>
+      )}
     </div>
   )
 }
