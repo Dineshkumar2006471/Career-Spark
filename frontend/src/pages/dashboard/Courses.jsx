@@ -41,11 +41,20 @@ function Courses() {
     })
   }, [])
 
-  if (isAnalyzing || !analysis) {
+  if (isAnalyzing) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500/20 border-t-blue-500"></div>
         <p className="animate-pulse font-display text-sm font-semibold text-muted">Gemini AI is finding courses with Google Search...</p>
+      </div>
+    )
+  }
+
+  if (!analysis) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
+        <p className="font-display text-lg font-semibold text-red-500">Failed to load courses.</p>
+        <p className="text-sm text-muted">Please check your Vertex AI integration or try again later.</p>
       </div>
     )
   }

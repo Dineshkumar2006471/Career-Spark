@@ -2,7 +2,7 @@
  * Skills renders the skill gap analyzer with visual progress indicators.
  * It exists to compare current skills against target role requirements.
  */
-import { Trophy, ChevronRight, Zap, Target } from 'lucide-react'
+import { Trophy, ChevronRight, Zap, Target, Wrench, ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { fetchDashboardAnalysis } from '../../services/apiClient.js'
 import { loadProfile, loadResumeVersions, loadRoadmap, loadSkillProgress, saveSkillProgress } from '../../services/supabaseData.js'
@@ -42,11 +42,20 @@ function Skills() {
     })
   }, [])
 
-  if (isAnalyzing || !analysis) {
+  if (isAnalyzing) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-amber-500/20 border-t-amber-500"></div>
         <p className="animate-pulse font-display text-sm font-semibold text-muted">Gemini AI is analyzing your skill gaps...</p>
+      </div>
+    )
+  }
+
+  if (!analysis) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
+        <p className="font-display text-lg font-semibold text-red-500">Failed to analyze skill gaps.</p>
+        <p className="text-sm text-muted">Please check your Vertex AI integration or try again later.</p>
       </div>
     )
   }

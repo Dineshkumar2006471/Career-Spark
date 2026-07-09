@@ -108,7 +108,14 @@ function Resume() {
         <input id="resume-upload-input" accept=".pdf,.docx,.txt" className="hidden" onChange={handleInputChange} type="file" />
       </div>
 
-      {/* Results */}
+      {/* Results & Errors */}
+      {status === 'error' && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-lg text-center shadow-sm">
+          <p className="text-red-600 font-semibold text-lg mb-2">Error analyzing resume</p>
+          <p className="text-red-500 text-sm">{result?.suggestions?.[0] || 'Unknown error occurred.'}</p>
+        </div>
+      )}
+
       {result && status === 'done' && (
         <div className="grid gap-xl lg:grid-cols-[320px_1fr]">
           {/* Score + Suggestions Column */}
