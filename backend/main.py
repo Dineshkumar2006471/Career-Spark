@@ -40,6 +40,10 @@ app.include_router(resume.router)
 app.include_router(interview.router)
 
 
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the CareerSpark API. The service is running!"}
+
 # Returns a lightweight health payload for local checks and Render health probes.
 @app.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
