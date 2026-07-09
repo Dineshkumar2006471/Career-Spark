@@ -62,7 +62,10 @@ export function buildDashboardPayload(profile, roadmap, resumes) {
     goal_note: profile?.goal_note || "",
     location: loc || null,
     college: profile?.institution || null,
-    degree: profile?.current_course ? `${profile.current_course}${profile.branch ? ` in ${profile.branch}` : ''}` : null
+    degree: profile?.current_course ? `${profile.current_course}${profile.branch ? ` in ${profile.branch}` : ''}` : null,
+    github_url: profile?.github_url || null,
+    linkedin_url: profile?.linkedin_url || null,
+    portfolio_url: profile?.portfolio_url || null
   }
 }
 

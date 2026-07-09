@@ -148,6 +148,9 @@ class DashboardAnalysisRequest(BaseModel):
     location: str | None = None
     college: str | None = None
     degree: str | None = None
+    github_url: str | None = None
+    linkedin_url: str | None = None
+    portfolio_url: str | None = None
 
 
 class DashboardAnalysisResponse(BaseModel):

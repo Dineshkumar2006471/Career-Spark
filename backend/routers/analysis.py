@@ -25,29 +25,41 @@ async def generate_dashboard_analysis(request: DashboardAnalysisRequest) -> Dash
         else:
             target_role_clean = "Freelance Developer"
     
-    prompt = (
-        "You are an expert career coach and hiring manager AI. "
-        "Analyze the provided student profile to generate a highly personalized, accurate Dashboard Analysis.\n\n"
-        f"TARGET ROLE: {target_role_clean}\n"
-        f"USER DESCRIPTION OF TARGET ROLE/GOAL: {request.target_role}\n"
-        f"PROFILE SKILLS: {', '.join(request.profile_skills) if request.profile_skills else 'None'}\n"
-        f"PROJECTS: {', '.join(request.projects) if request.projects else 'None'}\n"
-        f"EXPERIENCE: {', '.join(request.experience) if request.experience else 'None'}\n"
-        f"RESUME SCORE: {request.resume_score or 'Not scored'}\n"
-        f"LOCATION (City/State): {request.location or 'Unknown'}\n"
-        f"COLLEGE/UNIVERSITY: {request.college or 'Unknown'}\n"
-        f"DEGREE/COURSE: {request.degree or 'Unknown'}\n"
-        f"GOAL: {request.goal_note or 'None'}\n\n"
-        
-        "REQUIREMENTS:\n"
-        "1. In the 'targetRole' field of the output JSON, DO NOT repeat the user's conversational description or sentences. Return ONLY the concise, professional role name/title (e.g., 'Freelance Frontend Developer').\n"
-        "2. Identify the top 5 `gaps` (key skills required for the role). Score `current` (0-100) based on their profile, and `target` (0-100) based on role expectations. Set `priority` to Critical, Important, or Polish. Calculate the `gap` as `target - current`.\n"
-        "3. Calculate a practical `readinessScore` (0-100) based on how well their current profile matches the target role.\n"
-        "4. Generate realistic `strongestSignals` (e.g. 'Strong foundation in Python') and `riskSignals`.\n"
-        "5. Generate 4 `nextActions` outlining concrete steps, incorporating their Location/College if helpful.\n"
-        "6. Find 6 real-world `courses`. Generate REAL, functional search URLs (e.g. https://www.coursera.org/search?query=Machine+Learning or https://www.udemy.com/courses/search/?q=React).\n"
-        "7. Suggest 4 `simulations`/internships. If a Location is provided, suggest finding local internships in that specific city or region. Generate realistic search queries for job boards or internship portals (e.g., https://internshala.com/internships/keywords-ai-engineer).\n"
-    )
+    prompt = f"""
+You are an expert career coach and hiring manager AI. Analyze the provided student profile to generate a highly personalized, accurate Dashboard Analysis.
+
+<context>
+TARGET ROLE: {target_role_clean}
+USER DESCRIPTION OF TARGET ROLE/GOAL: {request.target_role}
+PROFILE SKILLS: {', '.join(request.profile_skills) if request.profile_skills else 'None'}
+PROJECTS: {', '.join(request.projects) if request.projects else 'None'}
+EXPERIENCE: {', '.join(request.experience) if request.experience else 'None'}
+RESUME SCORE: {request.resume_score or 'Not scored'}
+LOCATION: {request.location or 'Unknown'}
+COLLEGE/UNIVERSITY: {request.college or 'Unknown'}
+DEGREE/COURSE: {request.degree or 'Unknown'}
+GOAL NOTE: {request.goal_note or 'None'}
+GITHUB URL: {request.github_url or 'None provided'}
+LINKEDIN URL: {request.linkedin_url or 'None provided'}
+PORTFOLIO URL: {request.portfolio_url or 'None provided'}
+</context>
+
+<task>
+1. Evaluate the student's profile against the `{target_role_clean}` role.
+2. Calculate a `readinessScore` (0-100). Use abductive reasoning to penalize the score heavily if the target role is technical (e.g., Engineer, Developer) and the user has NO GitHub or Portfolio URL. A missing GitHub for an AI/Software role is a major red flag.
+3. Identify the top 5 `gaps`. If external links (GitHub/Portfolio) are missing, make building/linking them a 'Critical' gap. Calculate `gap` as `target - current`.
+4. Generate `strongestSignals` (e.g., 'Strong foundation in Python') and `riskSignals` (e.g., 'No GitHub portfolio linked to verify coding skills').
+5. Generate 4 `nextActions` outlining concrete steps, incorporating their Location/College or missing social links if helpful.
+6. Find 6 real-world `courses` with functional search URLs (e.g., https://www.coursera.org/search?query=Machine+Learning).
+7. Suggest 4 `simulations`/internships. Use the user's Location to generate realistic local job board search URLs.
+</task>
+
+<constraints>
+- In the 'targetRole' field, return ONLY the concise, professional role title (e.g., 'AI Engineer', NOT sentences).
+- Strictly adhere to the requested JSON schema.
+- Be brutally honest in scoring. Do not inflate the readiness score if proof (projects/links) is missing.
+</constraints>
+"""
     
     # We pass empty fallback_json, but if it fails we explicitly raise a 503 instead of hiding the error
     fallback_json = "{}"
