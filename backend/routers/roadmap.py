@@ -137,22 +137,23 @@ async def generate_roadmap(request: RoadmapRequest) -> RoadmapResponse:
     fallback_phases = build_fallback_phases(request.career_path)
     fallback = json.dumps({"phases": [phase.model_dump() for phase in fallback_phases]})
 
-    prompt = f"""Generate a highly detailed, personalized 3-month career roadmap for the target career below.
+    prompt = f"""Generate a highly detailed, personalized 3-month career roadmap.
 
 <student_profile>
-TARGET CAREER: {request.career_path}
+GENERIC CAREER PATH CATEGORY: {request.career_path}
+SPECIFIC TARGET ROLE & GOAL: {request.goal_note or 'No specific goal provided'}
 CURRENT SKILLS THE STUDENT ALREADY HAS: {', '.join(request.current_skills) if request.current_skills else 'NONE — complete beginner'}
 PAST EXPERIENCE & INTERNSHIPS: {', '.join(request.experience) if request.experience else 'NONE'}
-STUDENT'S GOAL NOTE: {request.goal_note or 'No specific goal provided'}
 </student_profile>
 
 <gap_analysis_instructions>
 BEFORE building the roadmap, you MUST:
-1. List the top 10 skills required for "{request.career_path}".
-2. Check which of those skills the student ALREADY has from their current_skills AND their PAST EXPERIENCE.
-3. Identify the GAPS — skills and practical experience the student is MISSING.
-4. Build the roadmap ONLY around the gaps. Do NOT teach skills the student already knows or repeat past internships.
-5. If the student already has experience in an area, suggest advanced polish or skipping fundamentals entirely.
+1. Identify the EXACT target role from the "SPECIFIC TARGET ROLE & GOAL" field. If they provided a specific role (e.g., "Frontend Intern", "React Developer", "AI Engineer"), you MUST build the roadmap for THAT exact role, NOT the generic career path category.
+2. List the top 10 skills required for their SPECIFIC target role.
+3. Check which of those skills the student ALREADY has from their current_skills AND their PAST EXPERIENCE.
+4. Identify the GAPS — skills and practical experience the student is MISSING for their specific role.
+5. Build the roadmap ONLY around the gaps. Do NOT teach skills the student already knows or repeat past internships.
+6. If the student already has experience in an area, suggest advanced polish or skipping fundamentals entirely.
 </gap_analysis_instructions>
 
 <roadmap_rules>

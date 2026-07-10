@@ -83,18 +83,21 @@ export function getInterviewFeedback(payload) {
 let analysisCachePromise = null
 let analysisCachePayloadStr = null
 
-export function fetchDashboardAnalysis(payload) {
+export function fetchDashboardAnalysis(payload, forceRefresh = false) {
   const payloadStr = JSON.stringify(payload)
-  if (analysisCachePromise && analysisCachePayloadStr === payloadStr) {
-    return analysisCachePromise
-  }
   
-  const cached = localStorage.getItem('analysis_cache_' + payloadStr)
-  if (cached) {
-    try {
-      const parsed = JSON.parse(cached)
-      return Promise.resolve(parsed)
-    } catch(e) {}
+  if (!forceRefresh) {
+    if (analysisCachePromise && analysisCachePayloadStr === payloadStr) {
+      return analysisCachePromise
+    }
+    
+    const cached = localStorage.getItem('analysis_cache_' + payloadStr)
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached)
+        return Promise.resolve(parsed)
+      } catch(e) {}
+    }
   }
   
   analysisCachePayloadStr = payloadStr

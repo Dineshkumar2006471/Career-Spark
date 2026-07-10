@@ -8,9 +8,11 @@ import { careerPaths } from '../../data/sampleData.js'
 import { useState } from 'react'
 import { roadmapPhases } from '../../data/sampleData.js'
 import { saveRoadmapChoice, saveSkillProgress, loadProfile } from '../../services/supabaseData.js'
-import { generateRoadmap } from '../../services/apiClient.js'
+import { generateRoadmap, fetchDashboardAnalysis } from '../../services/apiClient.js'
 import { skills } from '../../data/sampleData.js'
 import PublicNav from '../../components/layout/PublicNav.jsx'
+import { buildDashboardPayload } from '../../services/careerAnalysis.js'
+import { loadResumeVersions } from '../../services/supabaseData.js'
 
 // Renders path selection and returns the dashboard route after storing the path.
 function ChoosePath() {
@@ -45,6 +47,15 @@ function ChoosePath() {
 
       await saveRoadmapChoice(path, phasesToSave)
       await saveSkillProgress(skills)
+      
+      try {
+        const resumes = await loadResumeVersions()
+        const dashboardPayload = buildDashboardPayload(profile, { path, phases: phasesToSave }, resumes)
+        await fetchDashboardAnalysis(dashboardPayload)
+      } catch (analysisError) {
+        console.error("AI Dashboard Analysis pre-warm failed:", analysisError)
+      }
+
     } catch (error) {
       localStorage.setItem('careerspark_save_choice_error', error.message)
     } finally {
@@ -69,7 +80,7 @@ function ChoosePath() {
         </div>
         <div className="mt-xl flex justify-end">
           <Button onClick={saveChoice} disabled={isGenerating}>
-            {isGenerating ? 'Generating Your Custom Roadmap...' : 'Go to dashboard'}
+            {isGenerating ? 'Analyzing Profile & Generating Custom Dashboard...' : 'Go to dashboard'}
           </Button>
         </div>
       </section>

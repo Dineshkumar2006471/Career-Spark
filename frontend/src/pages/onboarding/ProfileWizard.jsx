@@ -189,9 +189,30 @@ function ProfileWizard() {
     updateField('resumeFileName', file.name)
     setResumeStatus('Uploading resume...')
     try {
-      const result = await analyzeResumeFile(file, 'Student career profile')
+      const targetRole = form.targetRole || 'Student career profile'
+      const result = await analyzeResumeFile(file, targetRole)
       updateField('resumeFeedback', { score: result.score, suggestions: result.suggestions })
       await saveResumeVersion(file.name, result.score, { suggestions: result.suggestions })
+      
+      // Auto-fill form with extracted resume data
+      if (result.extracted_skills && result.extracted_skills.length > 0) {
+        const existingSkills = parseList(form.skillsText)
+        const combinedSkills = Array.from(new Set([...existingSkills, ...result.extracted_skills]))
+        updateField('skillsText', combinedSkills.join('\n'))
+      }
+      
+      if (result.extracted_projects && result.extracted_projects.length > 0) {
+        const existingProjects = form.projectsText.trim()
+        const newProjects = result.extracted_projects.join('\n\n')
+        updateField('projectsText', existingProjects ? `${existingProjects}\n\n${newProjects}` : newProjects)
+      }
+      
+      if (result.extracted_experience && result.extracted_experience.length > 0) {
+        const existingExp = form.experienceText.trim()
+        const newExp = result.extracted_experience.join('\n\n')
+        updateField('experienceText', existingExp ? `${existingExp}\n\n${newExp}` : newExp)
+      }
+      
       setResumeStatus('Uploaded')
     } catch (error) {
       updateField('resumeFeedback', { processingError: error.message })
@@ -307,10 +328,40 @@ function ProfileWizard() {
               <TextArea label="Applications" onChange={(value) => updateField('applicationsText', value)} placeholder="Frontend intern at X, Data intern at Y" value={form.applicationsText} />
               <TextArea label="Achievements" onChange={(value) => updateField('achievementsText', value)} placeholder="Hackathon finalist, course certificate, top project" value={form.achievementsText} />
               <TextArea label="Experience" onChange={(value) => updateField('experienceText', value)} placeholder="Freelance site, campus volunteer, internship, club role" value={form.experienceText} />
-              <label className="block rounded-md border border-dashed border-hairline bg-surface-soft p-base text-sm font-medium text-ink">
+              <label className="block rounded-md border border-dashed border-hairline bg-surface-soft p-base text-sm font-medium text-ink relative overflow-hidden">
                 Resume upload
-                <input accept=".pdf,.docx,.txt" className="mt-sm block w-full text-sm text-body" onChange={handleResumeUpload} type="file" />
-                {resumeStatus ? <span className="mt-sm block text-body">{resumeStatus}</span> : null}
+                <input accept=".pdf,.docx,.txt" className="mt-sm block w-full text-sm text-body disabled:opacity-50" onChange={handleResumeUpload} type="file" disabled={resumeStatus === 'Uploading resume...'} />
+                
+                {resumeStatus === 'Uploading resume...' && (
+                  <div className="mt-sm flex items-center gap-2 text-sm text-primary font-medium">
+                    <span className="h-4 w-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></span>
+                    Analyzing your resume with AI...
+                  </div>
+                )}
+                
+                {form.resumeFeedback?.score && resumeStatus !== 'Uploading resume...' && (
+                  <div className="mt-sm rounded bg-green-50/50 p-sm border border-green-200">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-green-700">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                      Resume Successfully Processed
+                    </div>
+                    <p className="mt-1 text-xs text-green-600">
+                      ATS Match Score: <strong>{form.resumeFeedback.score}/100</strong>. Analysis saved to your profile.
+                    </p>
+                  </div>
+                )}
+                
+                {form.resumeFeedback?.processingError && resumeStatus !== 'Uploading resume...' && (
+                  <div className="mt-sm rounded bg-red-50 p-sm border border-red-200">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-red-700">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      Analysis Failed
+                    </div>
+                    <p className="mt-1 text-xs text-red-600">
+                      {form.resumeFeedback.processingError}
+                    </p>
+                  </div>
+                )}
               </label>
             </div>
           ) : null}

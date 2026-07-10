@@ -7,8 +7,8 @@ import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import MatchCompass from '../../components/ui/MatchCompass.jsx'
 import { careerPaths, roadmapPhases } from '../../data/sampleData.js'
-import { loadCertifications, loadLatestAssessment, loadProfile, loadResumeVersions, loadRoadmap, loadSkillProgress, subscribeToUserTable } from '../../services/supabaseData.js'
-import { fetchDashboardAnalysis } from '../../services/apiClient.js'
+import { loadCertifications, loadLatestAssessment, loadProfile, loadResumeVersions, loadRoadmap, loadSkillProgress, subscribeToUserTable, saveRoadmapChoice } from '../../services/supabaseData.js'
+import { fetchDashboardAnalysis, generateRoadmap } from '../../services/apiClient.js'
 import { getTargetRole, buildDashboardPayload, buildHiringAnalysis } from '../../services/careerAnalysis.js'
 
 // Reads the selected career path and returns a safe fallback path.
@@ -59,8 +59,35 @@ function Home() {
     }
   })
   const [isAnalyzing, setIsAnalyzing] = useState(!analysis)
+  const [isRegenerating, setIsRegenerating] = useState(false)
 
   const targetRole = getTargetRole(profile, roadmap, path)
+
+  const handleRegenerate = async () => {
+    setIsRegenerating(true)
+    try {
+      const payload = {
+        career_path: path.title,
+        current_skills: profile?.skills || [],
+        experience: profile?.experience_items || [],
+        goal_note: profile?.goal_note || ''
+      }
+      const aiResponse = await generateRoadmap(payload)
+      const phasesToSave = aiResponse?.phases || roadmapPhases
+      await saveRoadmapChoice(path, phasesToSave)
+      setRoadmap({ career_path: path.title, phases: phasesToSave })
+      
+      const newDashboardPayload = buildDashboardPayload(profile, { path, phases: phasesToSave }, resumeRows)
+      const newAnalysis = await fetchDashboardAnalysis(newDashboardPayload, true)
+      setAnalysis(newAnalysis)
+      localStorage.setItem('careerspark_dashboard_analysis', JSON.stringify(newAnalysis))
+    } catch (err) {
+      console.error("Regeneration failed:", err)
+      setAnalysis({ error: err.message || "Failed to regenerate insights." })
+    } finally {
+      setIsRegenerating(false)
+    }
+  }
 
   useEffect(() => {
     let unsubscribe = () => {}
@@ -147,6 +174,13 @@ function Home() {
               <Link className="inline-flex h-11 items-center gap-sm rounded-xl border border-hairline bg-canvas px-6 text-sm font-semibold text-ink hover:bg-surface-soft transition-all" to="/dashboard/courses">
                 <BookOpen size={16} /> Find courses
               </Link>
+              <button 
+                onClick={handleRegenerate}
+                disabled={isRegenerating || isAnalyzing}
+                className="inline-flex h-11 items-center gap-sm rounded-xl border border-hairline bg-canvas px-6 text-sm font-semibold text-ink hover:bg-surface-soft transition-all disabled:opacity-50"
+              >
+                {isRegenerating ? <span className="animate-pulse">Regenerating...</span> : <><Zap size={16} className="text-primary" /> Regenerate AI Insights</>}
+              </button>
             </div>
           </div>
         </div>

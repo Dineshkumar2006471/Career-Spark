@@ -42,9 +42,9 @@ async def generate_dashboard_analysis(request: DashboardAnalysisRequest) -> Dash
 <profile>
 TARGET ROLE: {target_role_clean}
 USER'S OWN DESCRIPTION OF GOAL: {request.target_role}
-SKILLS LISTED IN PROFILE: {', '.join(request.profile_skills) if request.profile_skills else 'NONE — user has not listed any skills'}
-PROJECTS LISTED IN PROFILE: {', '.join(request.projects) if request.projects else 'NONE — user has not listed any projects'}
-WORK EXPERIENCE: {', '.join(request.experience) if request.experience else 'NONE — user has no work experience listed'}
+SKILLS LISTED IN PROFILE (Includes Manual + Resume Extracted Skills): {', '.join(request.profile_skills) if request.profile_skills else 'NONE'}
+PROJECTS LISTED IN PROFILE (Includes Manual + Resume Extracted Projects): {', '.join(request.projects) if request.projects else 'NONE'}
+WORK EXPERIENCE (Includes Manual + Resume Extracted Experience): {', '.join(request.experience) if request.experience else 'NONE'}
 LATEST RESUME ATS SCORE: {request.resume_score if request.resume_score is not None else 'No resume uploaded yet'}
 LOCATION: {request.location or 'Not provided'}
 COLLEGE/UNIVERSITY: {request.college or 'Not provided'}
