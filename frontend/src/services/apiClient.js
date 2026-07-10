@@ -3,7 +3,7 @@
  * It exists so future pages do not duplicate base URL handling.
  */
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL // FastAPI base URL for browser-to-backend requests.
+const backendUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL // FastAPI base URL for browser-to-backend requests.
 
 // Builds an internal API URL and returns an absolute URL string.
 export function buildApiUrl(path) {

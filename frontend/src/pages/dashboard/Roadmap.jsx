@@ -14,6 +14,7 @@ function Roadmap() {
   const [roadmap, setRoadmap] = useState(null)
   const [skillRows, setSkillRows] = useState([])
   const [expandedPhase, setExpandedPhase] = useState(0)
+  const [isRegenerating, setIsRegenerating] = useState(false)
 
   useEffect(() => {
     loadProfile().then(setProfile).catch(() => {})
@@ -24,6 +25,30 @@ function Roadmap() {
   const targetRole = getTargetRole(profile, roadmap)
   const phases = Array.isArray(roadmap?.phases) && roadmap.phases.length ? roadmap.phases : roadmapPhases
   const progress = roadmap?.progress_percent ?? 34
+
+  async function handleRegenerate() {
+    if (!profile) return
+    setIsRegenerating(true)
+    try {
+      const { generateRoadmap } = await import('../../services/apiClient.js')
+      const { saveRoadmapChoice } = await import('../../services/supabaseData.js')
+      const payload = {
+        career_path: profile.goal || "Technology",
+        goal_note: profile.goal || "Technology",
+        current_skills: profile.skills?.map(s => s.name) || [],
+        experience: profile.experienceItems?.map(e => `${e.title} at ${e.company}`) || []
+      }
+      const response = await generateRoadmap(payload)
+      if (response && response.phases) {
+        const saved = await saveRoadmapChoice({ title: response.career_path || targetRole }, response.phases)
+        setRoadmap(saved)
+      }
+    } catch (error) {
+      alert(error.message || 'Failed to regenerate roadmap.')
+    } finally {
+      setIsRegenerating(false)
+    }
+  }
 
   // Generates a professional PDF with clickable links using jspdf.
   async function downloadRoadmap() {
@@ -192,9 +217,20 @@ function Roadmap() {
               </div>
             </div>
           </div>
-          <button className="inline-flex h-12 items-center gap-sm rounded-xl bg-ink px-6 text-sm font-semibold text-white hover:bg-primary shadow-md hover:shadow-lg transition-all" onClick={downloadRoadmap} type="button">
-            <Download size={18} /> Download PDF
-          </button>
+          <div className="flex gap-sm">
+            <button 
+              className="inline-flex h-12 items-center gap-sm rounded-xl bg-surface-soft border border-hairline px-6 text-sm font-semibold text-ink hover:bg-surface transition-all" 
+              onClick={handleRegenerate} 
+              disabled={isRegenerating}
+              type="button"
+            >
+              <Zap size={18} className={isRegenerating ? "animate-pulse text-primary" : "text-primary"} /> 
+              {isRegenerating ? 'Generating...' : 'Regenerate AI Roadmap'}
+            </button>
+            <button className="inline-flex h-12 items-center gap-sm rounded-xl bg-ink px-6 text-sm font-semibold text-white hover:bg-primary shadow-md hover:shadow-lg transition-all" onClick={downloadRoadmap} type="button">
+              <Download size={18} /> Download PDF
+            </button>
+          </div>
         </div>
       </section>
 
