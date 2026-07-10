@@ -29,6 +29,7 @@ function ChoosePath() {
       const payload = {
         career_path: path.title,
         current_skills: profile?.skills || [],
+        experience: profile?.experience_items || [],
         goal_note: profile?.goal_note || ''
       }
       

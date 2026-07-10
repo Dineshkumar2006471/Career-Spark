@@ -18,6 +18,7 @@ class ChatResponse(BaseModel):
 class RoadmapRequest(BaseModel):
     career_path: str
     current_skills: list[str] = Field(default_factory=list)
+    experience: list[str] = Field(default_factory=list)
     goal_note: str | None = None
 
 

@@ -83,15 +83,25 @@ export function getInterviewFeedback(payload) {
 let analysisCachePromise = null
 let analysisCachePayloadStr = null
 
-// Calls POST /analysis/dashboard with full profile data and returns a personalized dynamic AI dashboard analysis.
 export function fetchDashboardAnalysis(payload) {
   const payloadStr = JSON.stringify(payload)
   if (analysisCachePromise && analysisCachePayloadStr === payloadStr) {
     return analysisCachePromise
   }
   
+  const cached = localStorage.getItem('analysis_cache_' + payloadStr)
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached)
+      return Promise.resolve(parsed)
+    } catch(e) {}
+  }
+  
   analysisCachePayloadStr = payloadStr
-  analysisCachePromise = requestJson('/analysis/dashboard', { method: 'POST', body: payloadStr }).catch((err) => {
+  analysisCachePromise = requestJson('/analysis/dashboard', { method: 'POST', body: payloadStr }).then(res => {
+    try { localStorage.setItem('analysis_cache_' + payloadStr, JSON.stringify(res)) } catch(e) {}
+    return res
+  }).catch((err) => {
     analysisCachePromise = null // Clear cache on error so it can be retried
     throw err
   })

@@ -142,16 +142,17 @@ async def generate_roadmap(request: RoadmapRequest) -> RoadmapResponse:
 <student_profile>
 TARGET CAREER: {request.career_path}
 CURRENT SKILLS THE STUDENT ALREADY HAS: {', '.join(request.current_skills) if request.current_skills else 'NONE — complete beginner'}
+PAST EXPERIENCE & INTERNSHIPS: {', '.join(request.experience) if request.experience else 'NONE'}
 STUDENT'S GOAL NOTE: {request.goal_note or 'No specific goal provided'}
 </student_profile>
 
 <gap_analysis_instructions>
 BEFORE building the roadmap, you MUST:
 1. List the top 10 skills required for "{request.career_path}".
-2. Check which of those skills the student ALREADY has from their current_skills list.
-3. Identify the GAPS — skills the student is MISSING.
-4. Build the roadmap ONLY around the gaps. Do NOT teach skills the student already knows.
-5. If the student already knows a skill, skip it or mention it briefly as "already covered" in the first phase.
+2. Check which of those skills the student ALREADY has from their current_skills AND their PAST EXPERIENCE.
+3. Identify the GAPS — skills and practical experience the student is MISSING.
+4. Build the roadmap ONLY around the gaps. Do NOT teach skills the student already knows or repeat past internships.
+5. If the student already has experience in an area, suggest advanced polish or skipping fundamentals entirely.
 </gap_analysis_instructions>
 
 <roadmap_rules>
