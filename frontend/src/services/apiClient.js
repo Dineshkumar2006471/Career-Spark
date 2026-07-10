@@ -20,7 +20,11 @@ async function requestJson(path, options = {}) {
 
   if (!response.ok) {
     const payload = await response.json().catch(() => ({ detail: 'The request failed. Check the backend logs and try again.' }))
-    throw new Error(payload.detail || 'The request failed. Check the backend logs and try again.')
+    let errorMessage = payload.detail || 'The request failed. Check the backend logs and try again.'
+    if (Array.isArray(errorMessage)) {
+      errorMessage = 'Validation Error: ' + errorMessage.map(e => e.msg).join(', ')
+    }
+    throw new Error(errorMessage)
   }
 
   return response.json()

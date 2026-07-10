@@ -35,8 +35,8 @@ function Roadmap() {
       const payload = {
         career_path: profile.goal || "Technology",
         goal_note: profile.goal || "Technology",
-        current_skills: profile.skills?.map(s => s.name) || [],
-        experience: profile.experienceItems?.map(e => `${e.title} at ${e.company}`) || []
+        current_skills: profile.skills || [],
+        experience: profile.experience_items || []
       }
       const response = await generateRoadmap(payload)
       if (response && response.phases) {
