@@ -2,7 +2,7 @@
  * Resume renders a standalone resume analyzer with drag-and-drop upload,
  * Gemini AI-powered section extraction, ATS scoring, and score history.
  */
-import { ArrowRight, CheckCircle2, FileText, Upload, X } from 'lucide-react'
+import { ArrowRight, CheckCircle2, FileText, Upload } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { analyzeResumeFile } from '../../services/apiClient.js'
 import { loadProfile, loadResumeVersions, saveResumeVersion } from '../../services/supabaseData.js'
