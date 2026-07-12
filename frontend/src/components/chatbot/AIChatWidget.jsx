@@ -2,7 +2,7 @@
  * AIChatWidget provides the floating dashboard assistant powered by Gemini AI.
  * It exists as a persistent shortcut with profile, roadmap, and skill context.
  */
-import { Bot, ChevronDown, MessageCircle, Send, X, User } from 'lucide-react'
+import { Bot, ChevronDown, MessageCircle, Send, User } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { askChatbot } from '../../services/apiClient.js'
 import { loadProfile, loadRoadmap, loadSkillProgress } from '../../services/supabaseData.js'
