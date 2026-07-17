@@ -6,7 +6,6 @@ import { ArrowRight, Award, BookOpen, BriefcaseBusiness, CheckCircle2, ChevronDo
 import { useEffect, useState } from 'react'
 import { loadProfile, loadRoadmap, loadSkillProgress } from '../../services/supabaseData.js'
 import { getTargetRole } from '../../services/careerAnalysis.js'
-import { roadmapPhases } from '../../data/sampleData.js'
 
 // Renders the roadmap page.
 function Roadmap() {
@@ -23,8 +22,8 @@ function Roadmap() {
   }, [])
 
   const targetRole = getTargetRole(profile, roadmap)
-  const phases = Array.isArray(roadmap?.phases) && roadmap.phases.length ? roadmap.phases : roadmapPhases
-  const progress = roadmap?.progress_percent ?? 34
+  const phases = Array.isArray(roadmap?.phases) && roadmap.phases.length ? roadmap.phases : []
+  const progress = roadmap?.progress_percent ?? 0
 
   async function handleRegenerate() {
     if (!profile) return
@@ -235,8 +234,17 @@ function Roadmap() {
       </section>
 
       {/* Phase Timeline */}
-      <div className="space-y-lg">
-        {phases.map((phase, index) => {
+      {phases.length === 0 ? (
+        <div className="rounded-3xl border-2 border-dashed border-primary/20 p-12 text-center bg-canvas">
+          <Map size={48} className="mx-auto text-primary/40 mb-4" />
+          <h3 className="text-xl font-bold font-display text-ink mb-2">No Roadmap Generated</h3>
+          <p className="text-body text-sm max-w-md mx-auto mb-6">
+            Your personalized 90-day career roadmap hasn't been generated yet. Click the button above to build it using AI.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-lg">
+          {phases.map((phase, index) => {
           const isExpanded = expandedPhase === index
           return (
             <article className={`rounded-2xl border bg-canvas shadow-sm transition-all ${isExpanded ? 'border-primary/30 shadow-md' : 'border-hairline hover:shadow-md'}`} key={phase.title}>
@@ -335,6 +343,7 @@ function Roadmap() {
           )
         })}
       </div>
+      )}
     </div>
   )
 }

@@ -10,8 +10,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from models.health import HealthResponse
 from routers import analysis, assessment, chatbot, internships, interview, profiles, resume, roadmap
 
-frontend_origins = os.getenv("FRONTEND_ORIGINS", os.getenv("FRONTEND_ORIGIN", "http://localhost:5173,http://127.0.0.1:5173"))
-allowed_origins = [origin.strip() for origin in frontend_origins.split(",") if origin.strip()]
+import logging
+
+logger = logging.getLogger("careerspark.api")
+
+frontend_origins = os.getenv("FRONTEND_ORIGINS", os.getenv("FRONTEND_ORIGIN", "http://localhost:5173"))
+if frontend_origins == "*":
+    logger.warning("CRITICAL SECURITY WARNING: FRONTEND_ORIGINS is set to '*'. Defaulting to http://localhost:5173 for safety.")
+    allowed_origins = ["http://localhost:5173"]
+else:
+    allowed_origins = [origin.strip() for origin in frontend_origins.split(",") if origin.strip()]
 
 # App metadata explains the API in generated OpenAPI docs.
 app = FastAPI(

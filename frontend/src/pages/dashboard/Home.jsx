@@ -6,7 +6,7 @@ import { ArrowRight, Award, BookOpen, BriefcaseBusiness, FileText, Map, Target, 
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import MatchCompass from '../../components/ui/MatchCompass.jsx'
-import { careerPaths, roadmapPhases } from '../../data/sampleData.js'
+import { careerPaths } from '../../data/sampleData.js'
 import { loadCertifications, loadLatestAssessment, loadProfile, loadResumeVersions, loadRoadmap, loadSkillProgress, subscribeToUserTable, saveRoadmapChoice } from '../../services/supabaseData.js'
 import { fetchDashboardAnalysis, generateRoadmap } from '../../services/apiClient.js'
 import { getTargetRole, buildDashboardPayload, buildHiringAnalysis } from '../../services/careerAnalysis.js'
@@ -73,7 +73,7 @@ function Home() {
         goal_note: profile?.goal_note || ''
       }
       const aiResponse = await generateRoadmap(payload)
-      const phasesToSave = aiResponse?.phases || roadmapPhases
+      const phasesToSave = aiResponse?.phases || []
       await saveRoadmapChoice(path, phasesToSave)
       setRoadmap({ career_path: path.title, phases: phasesToSave })
       
@@ -141,7 +141,7 @@ function Home() {
   const roadmapProgress = (roadmap?.progress_percent ?? Math.round((completedSkills / Math.max(1, totalSkills)) * 100)) || 0
   const completedCertifications = certifications.filter((item) => item.status === 'completed').length
   const applicationCount = Array.isArray(profile?.applications) ? profile.applications.length : 0
-  const activePhases = Array.isArray(roadmap?.phases) && roadmap.phases.length ? roadmap.phases : (profile ? [] : roadmapPhases)
+  const activePhases = Array.isArray(roadmap?.phases) && roadmap.phases.length ? roadmap.phases : []
 
   return (
     <div className="space-y-xl">

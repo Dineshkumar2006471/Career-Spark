@@ -6,16 +6,19 @@ import { Bot, CheckCircle2, ChevronRight, Mic, MicOff, Square, Trophy, Settings 
 import { useEffect, useRef, useState } from 'react'
 import { getInterviewFeedback } from '../../services/apiClient.js'
 import { getTargetRole } from '../../services/careerAnalysis.js'
-import { loadProfile } from '../../services/supabaseData.js'
+import { loadProfile, saveInterviewSession } from '../../services/supabaseData.js'
 
 function Interview() {
   const [targetRole, setTargetRole] = useState('Frontend Developer')
-  const [questions, setQuestions] = useState([])
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentQuestion, setCurrentQuestion] = useState('Tell me about a time you had to learn a new tool for a project. How did you approach it?')
+  const [nextQuestionText, setNextQuestionText] = useState('')
+  const [questionCount, setQuestionCount] = useState(1)
+  const [chatHistory, setChatHistory] = useState([])
   const [isRecording, setIsRecording] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [feedback, setFeedback] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [interviewComplete, setInterviewComplete] = useState(false)
   
   const recognitionRef = useRef(null)
 
@@ -23,17 +26,9 @@ function Interview() {
     loadProfile().then(p => {
       const role = getTargetRole(p) || 'Frontend Developer'
       setTargetRole(role)
-      setQuestions([
-        `Tell me about a time you had to learn a new tool for a project. How did you approach it?`,
-        `Describe a ${role} project you are most proud of. What was your role?`,
-        `How do you handle disagreements in a team setting? Give an example.`,
-      ])
+      setCurrentQuestion(`Tell me about a time you had to learn a new tool for a project as a ${role}. How did you approach it?`)
     }).catch(() => {
-      setQuestions([
-        "Tell me about a time you learned something difficult.",
-        "Describe a project you are proud of.",
-        "Why do you want to work in this field?"
-      ])
+      // Keep defaults
     })
   }, [])
 
@@ -83,8 +78,31 @@ function Interview() {
     if (!transcript.trim()) return
     setIsAnalyzing(true)
     try {
-      const res = await getInterviewFeedback({ prompt: questions[currentIndex], transcript })
+      const res = await getInterviewFeedback({ 
+        prompt: currentQuestion, 
+        transcript, 
+        target_role: targetRole,
+        history: chatHistory 
+      })
+      
       setFeedback(res.feedback)
+      
+      if (res.next_question) {
+        setNextQuestionText(res.next_question)
+      }
+
+      setChatHistory(prev => [
+        ...prev,
+        { role: 'user', content: transcript },
+        { role: 'model', content: res.feedback }
+      ])
+      
+      try {
+        await saveInterviewSession(currentQuestion, transcript, res.feedback)
+      } catch (dbError) {
+        console.warn('Could not save session to db:', dbError)
+      }
+      
     } catch (error) {
       setFeedback(`Error analyzing response: ${error.message}`)
     } finally {
@@ -93,16 +111,23 @@ function Interview() {
   }
 
   const nextQuestion = () => {
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1)
+    if (questionCount >= 5) {
+      setInterviewComplete(true)
+      return
+    }
+    
+    if (nextQuestionText) {
+      setCurrentQuestion(nextQuestionText)
+      setNextQuestionText('')
       setTranscript('')
       setFeedback('')
+      setQuestionCount(prev => prev + 1)
       setIsRecording(false)
       recognitionRef.current?.stop()
     }
   }
 
-  const isComplete = currentIndex === questions.length - 1 && feedback
+  const isComplete = interviewComplete || (questionCount >= 5 && feedback)
 
   return (
     <div className="space-y-xl max-w-5xl mx-auto">
@@ -114,20 +139,20 @@ function Interview() {
             <Mic size={14} /> Mock Interview
           </div>
           <h2 className="font-display text-3xl font-bold">Behavioral Simulator</h2>
-          <p className="mt-sm max-w-2xl text-sm leading-relaxed text-body">Practice answering behavioral questions out loud. The Gemini AI coach will transcribe your speech and suggest improvements using the STAR method.</p>
+          <p className="mt-sm max-w-2xl text-sm leading-relaxed text-body">Practice answering behavioral questions out loud. The Gemini AI coach will transcribe your speech and generate dynamic follow-up questions.</p>
         </div>
       </section>
 
-      {questions.length > 0 && (
+      {currentQuestion && (
         <div className="grid gap-xl lg:grid-cols-[1fr_350px]">
           {/* Main Stage */}
           <div className="space-y-lg">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted mb-2">
-              Question {currentIndex + 1} of {questions.length}
+              Question {questionCount} of 5
             </div>
             
             <article className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-xl shadow-sm">
-              <h3 className="font-display text-2xl font-bold text-ink leading-tight">"{questions[currentIndex]}"</h3>
+              <h3 className="font-display text-2xl font-bold text-ink leading-tight">"{currentQuestion}"</h3>
             </article>
 
             {/* Recording Area */}
@@ -152,7 +177,7 @@ function Interview() {
               {(transcript || isRecording) && (
                 <div className="mt-lg border-t border-hairline pt-lg">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-muted mb-3">Live Transcript</h4>
-                  <div className="min-h-[100px] rounded-xl bg-surface-soft p-4 border border-hairline text-sm leading-relaxed text-ink shadow-inner">
+                  <div aria-live="polite" className="min-h-[100px] rounded-xl bg-surface-soft p-4 border border-hairline text-sm leading-relaxed text-ink shadow-inner">
                     {transcript || <span className="text-muted italic">Waiting for speech...</span>}
                   </div>
                   
@@ -187,7 +212,7 @@ function Interview() {
               
               {feedback ? (
                 <div className="space-y-6">
-                  <div className="rounded-xl bg-white p-base shadow-sm border border-hairline text-sm leading-relaxed text-ink">
+                  <div aria-live="assertive" className="rounded-xl bg-white p-base shadow-sm border border-hairline text-sm leading-relaxed text-ink">
                     {feedback}
                   </div>
                   

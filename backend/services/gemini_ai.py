@@ -51,8 +51,11 @@ async def generate_text(prompt: str, fallback: str, temperature: float = 0.3) ->
                     await asyncio.sleep(base_delay * (2 ** attempt))
                     continue
             logger.error(f"Gemini generate_text error (attempt {attempt + 1}): {exc}")
-            return fallback
-    return fallback
+            # If we've exhausted retries, raise an exception instead of failing silently
+            if attempt == max_retries - 1:
+                raise Exception(f"AI Service Error: {exc}")
+    
+    raise Exception("AI Service Unavailable after retries.")
 
 
 # Calls Gemini with a multi-turn chat messages list and returns the assistant text.
@@ -127,9 +130,10 @@ async def complete_chat(
                         await asyncio.sleep(wait)
                         continue
                 logger.error(f"Gemini complete_chat error (attempt {attempt + 1}): {exc}")
-                return fallback
+                if attempt == max_retries - 1:
+                    raise Exception(f"AI Service Error: {exc}")
                 
-        return fallback
+        raise Exception("AI Service Unavailable after retries.")
     except Exception as exc:
         logger.error(f"Gemini complete_chat outer error: {exc}")
-        return fallback
+        raise exc

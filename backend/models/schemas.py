@@ -113,10 +113,13 @@ class ResumeAnalyzeResponse(BaseModel):
 class InterviewFeedbackRequest(BaseModel):
     prompt: str
     transcript: str
+    target_role: str = "Frontend Developer"
+    history: list[dict] = Field(default_factory=list)
 
 
 class InterviewFeedbackResponse(BaseModel):
     feedback: str
+    next_question: str | None = None
 
 
 class SkillGap(BaseModel):

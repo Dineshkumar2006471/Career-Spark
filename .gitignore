@@ -25,3 +25,6 @@ Thumbs.db
 
 # Runtime logs are generated during local development.
 *.log
+
+.vercel
+.env*
