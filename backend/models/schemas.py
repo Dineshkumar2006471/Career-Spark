@@ -115,10 +115,20 @@ class InterviewFeedbackRequest(BaseModel):
     transcript: str
     target_role: str = "Frontend Developer"
     history: list[dict] = Field(default_factory=list)
+    profile_skills: list[str] = Field(default_factory=list)
+    experience: list[str] = Field(default_factory=list)
+    projects: list[str] = Field(default_factory=list)
+
+
+class StructuredFeedback(BaseModel):
+    score: int
+    pros: list[str]
+    cons: list[str]
+    example_answer: str
 
 
 class InterviewFeedbackResponse(BaseModel):
-    feedback: str
+    feedback: StructuredFeedback
     next_question: str | None = None
 
 

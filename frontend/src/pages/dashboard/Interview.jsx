@@ -10,6 +10,7 @@ import { loadProfile, saveInterviewSession } from '../../services/supabaseData.j
 
 function Interview() {
   const [targetRole, setTargetRole] = useState('Frontend Developer')
+  const [userProfile, setUserProfile] = useState(null)
   const [currentQuestion, setCurrentQuestion] = useState('Tell me about a time you had to learn a new tool for a project. How did you approach it?')
   const [nextQuestionText, setNextQuestionText] = useState('')
   const [questionCount, setQuestionCount] = useState(1)
@@ -25,6 +26,7 @@ function Interview() {
   useEffect(() => {
     loadProfile().then(p => {
       const role = getTargetRole(p) || 'Frontend Developer'
+      setUserProfile(p)
       setTargetRole(role)
       setCurrentQuestion(`Tell me about a time you had to learn a new tool for a project as a ${role}. How did you approach it?`)
     }).catch(() => {
@@ -82,7 +84,10 @@ function Interview() {
         prompt: currentQuestion, 
         transcript, 
         target_role: targetRole,
-        history: chatHistory 
+        history: chatHistory,
+        profile_skills: userProfile?.skills || [],
+        experience: userProfile?.experience || [],
+        projects: userProfile?.projects || []
       })
       
       setFeedback(res.feedback)
@@ -94,11 +99,11 @@ function Interview() {
       setChatHistory(prev => [
         ...prev,
         { role: 'user', content: transcript },
-        { role: 'model', content: res.feedback }
+        { role: 'model', content: JSON.stringify(res.feedback) }
       ])
       
       try {
-        await saveInterviewSession(currentQuestion, transcript, res.feedback)
+        await saveInterviewSession(currentQuestion, transcript, JSON.stringify(res.feedback))
       } catch (dbError) {
         console.warn('Could not save session to db:', dbError)
       }
@@ -144,9 +149,10 @@ function Interview() {
       </section>
 
       {currentQuestion && (
-        <div className="grid gap-xl lg:grid-cols-[1fr_350px]">
-          {/* Main Stage */}
-          <div className="space-y-lg">
+        <div className="grid gap-xl grid-cols-1 lg:grid-cols-12">
+          
+          {/* Main Stage - Left Side (8 cols) */}
+          <div className="lg:col-span-8 space-y-lg">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted mb-2">
               Question {questionCount} of 5
             </div>
@@ -200,23 +206,71 @@ function Interview() {
                 </div>
               )}
             </article>
+
+            {/* Ideal Answer Bento Card */}
+            {feedback && feedback.example_answer && (
+              <article className="rounded-2xl border border-primary/30 bg-primary/5 p-lg shadow-sm">
+                <div className="flex items-center gap-sm mb-4">
+                  <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary/20 text-primary"><Trophy size={16} /></div>
+                  <h3 className="font-display font-bold text-ink">Ideal STAR Response</h3>
+                </div>
+                <div className="rounded-xl bg-white p-base shadow-inner border border-hairline text-sm leading-relaxed text-ink italic">
+                  "{feedback.example_answer}"
+                </div>
+              </article>
+            )}
           </div>
 
-          {/* Feedback Sidebar */}
-          <div className="space-y-lg">
-            <article className={`rounded-2xl border p-lg transition-all h-full ${feedback ? 'border-primary/30 bg-primary/5 shadow-md' : 'border-hairline bg-canvas opacity-50'}`}>
-              <div className="flex items-center gap-sm mb-lg">
-                <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Bot size={20} /></div>
-                <h3 className="font-display text-xl font-bold">Coach Feedback</h3>
+          {/* Feedback Sidebar - Right Side (4 cols) */}
+          <div className="lg:col-span-4 space-y-lg">
+            <article className={`rounded-2xl border p-lg transition-all h-full flex flex-col ${feedback ? 'border-primary/30 bg-white shadow-md' : 'border-hairline bg-canvas opacity-50'}`}>
+              <div className="flex items-center justify-between mb-lg">
+                <div className="flex items-center gap-sm">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Bot size={20} /></div>
+                  <h3 className="font-display text-xl font-bold">Coach Feedback</h3>
+                </div>
+                {feedback && (
+                  <div className={`px-3 py-1 rounded-full text-sm font-bold ${feedback.score >= 7 ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                    Score: {feedback.score}/10
+                  </div>
+                )}
               </div>
               
               {feedback ? (
-                <div className="space-y-6">
-                  <div aria-live="assertive" className="rounded-xl bg-white p-base shadow-sm border border-hairline text-sm leading-relaxed text-ink">
-                    {feedback}
-                  </div>
+                <div className="space-y-6 flex-grow">
+                  {/* Pros Section */}
+                  {feedback.pros && feedback.pros.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-bold text-green-700 flex items-center gap-2">
+                        <CheckCircle2 size={16} /> What you did well
+                      </h4>
+                      <ul className="space-y-2">
+                        {feedback.pros.map((pro, idx) => (
+                          <li key={idx} className="text-sm text-ink bg-green-50 rounded-lg p-3 border border-green-100 leading-snug">
+                            {pro}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Cons Section */}
+                  {feedback.cons && feedback.cons.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-bold text-red-700 flex items-center gap-2">
+                        <Settings size={16} /> Areas to improve
+                      </h4>
+                      <ul className="space-y-2">
+                        {feedback.cons.map((con, idx) => (
+                          <li key={idx} className="text-sm text-ink bg-red-50 rounded-lg p-3 border border-red-100 leading-snug">
+                            {con}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   
-                  <div className="pt-4 border-t border-primary/20">
+                  <div className="pt-6 border-t border-hairline mt-auto">
                     <button 
                       onClick={nextQuestion}
                       disabled={isComplete}
@@ -231,9 +285,9 @@ function Interview() {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center h-48 text-center text-muted">
+                <div className="flex flex-col items-center justify-center h-48 text-center text-muted flex-grow">
                   <Bot size={32} className="mb-4 opacity-20" />
-                  <p className="text-sm">Speak your answer and click Analyze to get Gemini feedback.</p>
+                  <p className="text-sm">Speak your answer and click Analyze to get your Bento Grid scorecard.</p>
                 </div>
               )}
             </article>
