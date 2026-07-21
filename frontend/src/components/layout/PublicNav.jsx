@@ -5,7 +5,9 @@
 import { Link } from 'react-router-dom'
 import Button from '../ui/Button.jsx'
 import UserNavMenu from './UserNavMenu.jsx'
+import ThemeToggle from '../ui/ThemeToggle.jsx'
 import { useAuth } from '../../context/authState.js'
+import logo from '../../assets/logo.png'
 
 // Renders the public navigation and returns shared links plus auth actions.
 function PublicNav() {
@@ -13,8 +15,8 @@ function PublicNav() {
 
   return (
     <nav className="mx-auto flex max-w-[1180px] items-center justify-between px-lg py-lg">
-      <Link className="font-display text-xl font-semibold text-ink" to="/">
-        CareerSpark
+      <Link className="flex items-center" to="/">
+        <img src={logo} alt="CareerSpark Logo" className="h-12 w-auto" />
       </Link>
       <div className="hidden items-center gap-lg rounded-md border border-hairline bg-canvas px-base py-sm text-sm text-body md:flex">
         <a className="hover:text-ink" href="/#features">Features</a>
@@ -22,9 +24,13 @@ function PublicNav() {
         <a className="hover:text-ink" href="/#workflow">Workflow</a>
       </div>
       {auth?.user ? (
-        <UserNavMenu />
+        <div className="flex items-center gap-sm">
+          <ThemeToggle />
+          <UserNavMenu />
+        </div>
       ) : (
         <div className="flex items-center gap-sm">
+          <ThemeToggle />
           <Button to="/login" variant="text" className="hidden px-sm text-ink sm:inline-flex">Log in</Button>
           <Button to="/register" className="bg-ink text-white hover:bg-primary">Start free</Button>
         </div>

@@ -2,6 +2,7 @@
 export default {
   // Tailwind scans authored app files so generated folders do not affect class output.
   content: ['./index.html', './src/**/*.{js,jsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       // Design tokens mirror DESIGN.md Sections 1-3 and keep raw hex values out of components.

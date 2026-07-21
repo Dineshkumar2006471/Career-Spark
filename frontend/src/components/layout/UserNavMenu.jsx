@@ -65,16 +65,11 @@ function UserNavMenu({ className = '' }) {
       <button
         aria-expanded={open}
         aria-label="Open profile menu"
-        className="flex h-11 items-center gap-sm rounded-md border border-hairline bg-canvas px-sm text-sm font-medium text-ink hover:bg-surface-soft"
+        className="grid h-10 w-10 place-items-center rounded-full bg-ink font-mono text-sm font-medium text-white transition-all hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         onClick={() => setOpen((current) => !current)}
         type="button"
       >
-        <span className="grid h-8 w-8 place-items-center rounded-md bg-ink font-mono text-xs text-white">
-          {getInitials(profile, auth.user)}
-        </span>
-        <span className="hidden max-w-36 truncate text-left md:block">
-          {displayName}
-        </span>
+        {getInitials(profile, auth.user)}
       </button>
 
       {open ? (

@@ -15,19 +15,21 @@ import {
   User,
   Wrench,
 } from 'lucide-react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import AIChatWidget from '../chatbot/AIChatWidget.jsx'
 import UserNavMenu from './UserNavMenu.jsx'
+import ThemeToggle from '../ui/ThemeToggle.jsx'
+import logo from '../../assets/logo.png'
 
 const navItems = [
   ['Home', '/dashboard', Home],
   ['Roadmap', '/dashboard/roadmap', Map],
-  ['Skills', '/dashboard/skills', Wrench],
-  ['Certs', '/dashboard/certifications', Award],
+  ['Skill Analysis', '/dashboard/skills', Wrench],
+  ['Certifications', '/dashboard/certifications', Award],
   ['Courses', '/dashboard/courses', Search],
   ['Internships', '/dashboard/internships', BriefcaseBusiness],
-  ['Resume', '/dashboard/resume', FileText],
-  ['Interview', '/dashboard/interview', Mic],
+  ['Resume Analyzer', '/dashboard/resume', FileText],
+  ['Mock Interview', '/dashboard/interview', Mic],
   ['Profile', '/dashboard/profile', User],
 ]
 
@@ -45,13 +47,9 @@ function DashboardLayout() {
     <div className="h-screen overflow-hidden bg-surface-soft text-ink lg:grid lg:grid-cols-[260px_1fr]">
       <aside className="hidden h-screen overflow-y-auto border-r border-hairline bg-canvas lg:flex lg:flex-col">
         <div className="px-lg py-xl">
-          <div className="flex items-center gap-sm">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-primary to-blue-400 text-white font-bold text-lg shadow-md">C</div>
-            <div>
-              <p className="font-display text-lg font-bold tracking-tight">CareerSpark</p>
-              <p className="text-xs text-muted">Roadmap workspace</p>
-            </div>
-          </div>
+          <Link className="inline-block" to="/">
+            <img src={logo} alt="CareerSpark Logo" className="h-14 w-auto" />
+          </Link>
         </div>
         <nav className="flex-1 space-y-xs px-base">
           {navItems.map(([label, to, Icon]) => (
@@ -77,17 +75,15 @@ function DashboardLayout() {
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-col pb-24 lg:pb-0">
-        <header className="z-10 shrink-0 border-b border-hairline bg-canvas/80 backdrop-blur-md">
-          <div className="mx-auto flex max-w-[1180px] items-center justify-between gap-lg px-lg py-3">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-primary">CareerSpark</p>
-              <h1 className="font-display text-xl font-bold leading-tight">{getTitle(pathname)}</h1>
-            </div>
-            <div className="flex items-center gap-sm">
-              <div className="hidden h-10 min-w-[280px] items-center gap-sm rounded-xl border border-hairline bg-surface-soft px-base text-sm text-muted xl:flex hover:border-primary/30 transition-colors cursor-pointer">
-                <Search aria-hidden="true" size={16} />
-                Search roadmap, skills, internships
+        <header className="z-10 shrink-0 border-b border-hairline bg-canvas">
+          <div className="mx-auto flex h-[72px] max-w-[1180px] items-center justify-between gap-lg px-lg">
+            <h1 className="font-display text-2xl font-semibold text-ink">{getTitle(pathname)}</h1>
+            <div className="flex items-center gap-6">
+              <div className="hidden h-10 w-96 cursor-pointer items-center gap-3 rounded-full bg-surface-soft px-4 text-sm text-muted transition-colors hover:bg-surface-dark/5 lg:flex">
+                <Search aria-hidden="true" size={18} />
+                <span className="flex-1 text-left">Search roadmap, skills, internships...</span>
               </div>
+              <ThemeToggle />
               <UserNavMenu />
             </div>
           </div>

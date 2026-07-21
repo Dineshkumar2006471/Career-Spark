@@ -5,6 +5,7 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { ThemeProvider } from './context/ThemeContext.jsx'
 import ProtectedRoute from './components/layout/ProtectedRoute.jsx'
 import Landing from './pages/Landing.jsx'
 import Login from './pages/Login.jsx'
@@ -28,32 +29,34 @@ const Profile = lazy(() => import('./pages/dashboard/Profile.jsx'))
 // Renders the route tree and returns the active page component.
 function App() {
   return (
-    <BrowserRouter>
+    <ThemeProvider>
       <AuthProvider>
-        <Suspense fallback={<main className="grid min-h-screen place-items-center bg-canvas text-ink">Loading CareerSpark...</main>}>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/onboarding/profile" element={<ProtectedRoute><ProfileWizard /></ProtectedRoute>} />
-            <Route path="/onboarding/assessment" element={<ProtectedRoute><Assessment /></ProtectedRoute>} />
-            <Route path="/onboarding/results" element={<ProtectedRoute><Results /></ProtectedRoute>} />
-            <Route path="/onboarding/choose" element={<ProtectedRoute><ChoosePath /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-              <Route index element={<Home />} />
-              <Route path="roadmap" element={<Roadmap />} />
-              <Route path="skills" element={<Skills />} />
-              <Route path="certifications" element={<Certifications />} />
-              <Route path="courses" element={<Courses />} />
-              <Route path="internships" element={<Internships />} />
-              <Route path="resume" element={<Resume />} />
-              <Route path="interview" element={<Interview />} />
-              <Route path="profile" element={<Profile />} />
-            </Route>
-          </Routes>
-        </Suspense>
+        <BrowserRouter>
+          <Suspense fallback={<main className="grid min-h-screen place-items-center bg-canvas text-ink">Loading CareerSpark...</main>}>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/onboarding/profile" element={<ProtectedRoute><ProfileWizard /></ProtectedRoute>} />
+              <Route path="/onboarding/assessment" element={<ProtectedRoute><Assessment /></ProtectedRoute>} />
+              <Route path="/onboarding/results" element={<ProtectedRoute><Results /></ProtectedRoute>} />
+              <Route path="/onboarding/choose" element={<ProtectedRoute><ChoosePath /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                <Route index element={<Home />} />
+                <Route path="roadmap" element={<Roadmap />} />
+                <Route path="skills" element={<Skills />} />
+                <Route path="certifications" element={<Certifications />} />
+                <Route path="courses" element={<Courses />} />
+                <Route path="internships" element={<Internships />} />
+                <Route path="resume" element={<Resume />} />
+                <Route path="interview" element={<Interview />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
       </AuthProvider>
-    </BrowserRouter>
+    </ThemeProvider>
   )
 }
 

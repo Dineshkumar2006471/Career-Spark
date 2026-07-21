@@ -5,6 +5,7 @@
 import { CircleUserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import authPhoto from '../assets/student-roadmap-login.jpg'
+import logo from '../assets/logo.png'
 import Button from '../components/ui/Button.jsx'
 import { supabase } from '../services/supabaseClient.js'
 import { useState } from 'react'
@@ -55,8 +56,8 @@ function Login() {
       <section className="mx-auto grid min-h-[calc(100vh-120px)] max-w-[1120px] overflow-hidden rounded-lg border border-hairline bg-canvas md:grid-cols-[1.05fr_0.95fr]">
         <div className="flex items-center justify-center px-lg py-xl">
           <div className="w-full max-w-md">
-            <Link className="font-display text-2xl font-semibold" to="/">
-              CareerSpark
+            <Link className="inline-block" to="/">
+              <img src={logo} alt="CareerSpark Logo" className="h-12 w-auto" />
             </Link>
             <p className="mt-xl inline-flex rounded-sm border border-hairline px-sm py-xs text-xs font-medium uppercase tracking-[0.04em] text-body">Welcome back</p>
             <h1 className="mt-lg font-display text-5xl font-semibold leading-[1.05]">Continue your roadmap.</h1>

@@ -2,7 +2,7 @@
  * Resume renders a standalone resume analyzer with drag-and-drop upload,
  * Gemini AI-powered section extraction, ATS scoring, and score history.
  */
-import { ArrowRight, CheckCircle2, FileText, Upload } from 'lucide-react'
+import { ArrowRight, CheckCircle2, ChevronRight, FileText, Loader2, Upload, Lightbulb } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { analyzeResumeFile } from '../../services/apiClient.js'
 import { loadProfile, loadResumeVersions, saveResumeVersion } from '../../services/supabaseData.js'
@@ -36,6 +36,19 @@ function Resume() {
   const [status, setStatus] = useState('idle')
   const [dragActive, setDragActive] = useState(false)
   const targetRole = getTargetRole(profile)
+
+  const formatSuggestion = (text) => {
+    const parts = text.split(':')
+    if (parts.length > 1) {
+      return (
+        <>
+          <strong className="block text-ink mb-1.5 font-semibold text-sm">{parts[0]}:</strong>
+          <span className="text-body leading-relaxed">{parts.slice(1).join(':').trim()}</span>
+        </>
+      )
+    }
+    return <span className="text-body leading-relaxed">{text}</span>
+  }
 
   useEffect(() => {
     loadProfile().then(setProfile).catch(() => {})
@@ -118,27 +131,13 @@ function Resume() {
 
       {result && status === 'done' && (
         <div className="grid gap-xl lg:grid-cols-[320px_1fr]">
-          {/* Score + Suggestions Column */}
+          {/* Left Column (Score & Meta) */}
           <div className="space-y-lg">
             <article className="rounded-2xl border border-hairline bg-canvas p-xl shadow-sm text-center">
               <ScoreRing score={result.score} />
               <p className="mt-lg font-display text-lg font-bold">{result.score >= 80 ? 'Strong Resume' : result.score >= 55 ? 'Needs Improvement' : 'Weak — Major Gaps'}</p>
               <p className="mt-xs text-sm text-body">for {targetRole || 'general'} roles</p>
             </article>
-            <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
-              <h3 className="font-display font-bold text-lg mb-base">Suggestions</h3>
-              <div className="space-y-sm">
-                {result.suggestions.map((text, i) => (
-                  <p className="flex items-start gap-sm rounded-xl bg-amber-50/50 border border-amber-100 p-sm text-sm text-body" key={i}>
-                    <ArrowRight size={14} className="mt-0.5 text-amber-600 shrink-0" />{text}
-                  </p>
-                ))}
-              </div>
-            </article>
-          </div>
-
-          {/* Extracted Sections */}
-          <div className="space-y-lg">
             {result.profile_summary && (
               <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
                 <h3 className="font-display font-bold text-lg mb-sm">Profile Summary</h3>
@@ -157,18 +156,6 @@ function Resume() {
                 </div>
               </article>
             )}
-            {result.extracted_projects?.length > 0 && (
-              <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
-                <h3 className="font-display font-bold text-lg mb-base">Projects Found</h3>
-                <div className="grid gap-sm md:grid-cols-2">
-                  {result.extracted_projects.map((project, i) => (
-                    <div className="rounded-xl bg-surface-soft p-base border border-hairline" key={i}>
-                      <p className="text-sm font-medium text-ink">{project}</p>
-                    </div>
-                  ))}
-                </div>
-              </article>
-            )}
             {result.extracted_education?.length > 0 && (
               <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
                 <h3 className="font-display font-bold text-lg mb-base">Education</h3>
@@ -177,6 +164,35 @@ function Resume() {
                     <p className="flex items-start gap-sm text-sm text-body" key={i}>
                       <span className="mt-0.5 h-2 w-2 rounded-full bg-primary shrink-0"></span>{item}
                     </p>
+                  ))}
+                </div>
+              </article>
+            )}
+          </div>
+
+          {/* Right Column (Core Content & Suggestions) */}
+          <div className="space-y-lg">
+            <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
+              <h3 className="font-display font-bold text-xl mb-base text-ink flex items-center gap-2">
+                <Lightbulb size={20} className="text-primary" />
+                Actionable Suggestions
+              </h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                {result.suggestions.map((text, i) => (
+                  <div className="flex flex-col rounded-xl bg-surface-soft border border-hairline p-base text-sm shadow-sm" key={i}>
+                    {formatSuggestion(text)}
+                  </div>
+                ))}
+              </div>
+            </article>
+            {result.extracted_projects?.length > 0 && (
+              <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
+                <h3 className="font-display font-bold text-lg mb-base">Projects Found</h3>
+                <div className="grid gap-sm md:grid-cols-2">
+                  {result.extracted_projects.map((project, i) => (
+                    <div className="rounded-xl bg-surface-soft p-base border border-hairline" key={i}>
+                      <p className="text-sm font-medium text-ink">{project}</p>
+                    </div>
                   ))}
                 </div>
               </article>
