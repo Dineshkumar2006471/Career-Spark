@@ -19,6 +19,7 @@ class Settings:
     adzuna_app_id: str | None
     adzuna_app_key: str | None
     github_token: str | None
+    gemini_api_key: str | None
 
 
 # Loads backend environment variables and returns immutable settings for services.
@@ -31,4 +32,5 @@ def get_settings() -> Settings:
         adzuna_app_id=os.getenv("ADZUNA_APP_ID"),  # Adzuna application ID for internship search requests.
         adzuna_app_key=os.getenv("ADZUNA_APP_KEY"),  # Adzuna API key for authenticated internship search requests.
         github_token=os.getenv("GITHUB_TOKEN"),  # Optional GitHub token for higher public API rate limits.
+        gemini_api_key=os.getenv("GEMINI_API_KEY"),  # Standard Gemini API key for simpler deployments.
     )

@@ -16,8 +16,7 @@ logger = logging.getLogger("careerspark.api")
 
 frontend_origins = os.getenv("FRONTEND_ORIGINS", os.getenv("FRONTEND_ORIGIN", "http://localhost:5173"))
 if frontend_origins == "*":
-    logger.warning("CRITICAL SECURITY WARNING: FRONTEND_ORIGINS is set to '*'. Defaulting to http://localhost:5173 for safety.")
-    allowed_origins = ["http://localhost:5173"]
+    allowed_origins = ["*"]
 else:
     allowed_origins = [origin.strip() for origin in frontend_origins.split(",") if origin.strip()]
 
@@ -32,7 +31,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

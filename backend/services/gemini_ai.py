@@ -18,9 +18,13 @@ MODEL_NAME = "gemini-2.5-flash"
 # Initializes the Gemini client and returns it for reuse across requests.
 def _get_client():
     settings = get_settings()
+    if settings.gemini_api_key:
+        return genai.Client(api_key=settings.gemini_api_key)
+        
     if not settings.vertex_project_id:
-        logger.warning("VERTEX_PROJECT_ID not set — AI client will not initialize.")
+        logger.warning("Neither GEMINI_API_KEY nor VERTEX_PROJECT_ID are set — AI client will not initialize.")
         return None
+        
     return genai.Client(vertexai=True, project=settings.vertex_project_id, location=settings.vertex_location)
 
 
