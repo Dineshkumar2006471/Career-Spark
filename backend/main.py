@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from models.health import HealthResponse
-from routers import analysis, assessment, chatbot, internships, interview, profiles, resume, roadmap
+from routers import analysis, assessment, chatbot, intelligence, internships, interview, jobs, profiles, resume, roadmap
 
 import logging
 
@@ -39,6 +39,8 @@ app.add_middleware(
 # Feature routers are mounted early so each phase can add endpoints in its own module.
 app.include_router(analysis.router)
 app.include_router(assessment.router)
+app.include_router(intelligence.router)
+app.include_router(jobs.router)
 app.include_router(roadmap.router)
 app.include_router(chatbot.router)
 app.include_router(internships.router)

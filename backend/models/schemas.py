@@ -177,3 +177,71 @@ class DashboardAnalysisResponse(BaseModel):
     nextActions: list[str]
     courses: list[ResourceItem]
     simulations: list[ResourceItem]
+
+
+class CareerCompatibilityItem(BaseModel):
+    role: str
+    match_percentage: int
+
+
+class IndustryDemandPoint(BaseModel):
+    year: str
+    demand_index: int
+    growth_label: str | None = None
+
+
+class CareerIntelligenceRequest(BaseModel):
+    target_role: str | None = "Software Developer"
+    profile_skills: list[str] = Field(default_factory=list)
+    projects: list[str] = Field(default_factory=list)
+    experience: list[str] = Field(default_factory=list)
+    location: str | None = None
+    goal_note: str | None = None
+
+
+class CareerIntelligenceResponse(BaseModel):
+    compatibility: list[CareerCompatibilityItem]
+    industry_demand: list[IndustryDemandPoint]
+    growth_badge: str = "+20% Growth"
+    expected_salary: str = "₹6.5 – 12 LPA"
+    salary_subtitle: str = "for Software Developer"
+    job_opportunities: str = "1.8M+"
+    opportunities_subtitle: str = "Across India"
+    growth_rate: str = "High"
+    ai_suggestion: str = "Based on your profile, AI recommends strengthening Python and Cloud Computing to get higher opportunities."
+
+
+class JobRecommendationItem(BaseModel):
+    id: str
+    company: str
+    domain: str
+    title: str
+    location: str
+    experience: str
+    salary: str
+    work_mode: str
+    match_percentage: int
+    deadline: str
+    apply_url: str
+    match_reason: str
+
+
+class JobRecommendationsRequest(BaseModel):
+    target_role: str | None = "Software Developer"
+    profile_skills: list[str] = Field(default_factory=list)
+    projects: list[str] = Field(default_factory=list)
+    experience: list[str] = Field(default_factory=list)
+    location: str | None = "India"
+    resume_score: int | None = None
+
+
+class JobRecommendationsResponse(BaseModel):
+    jobs: list[JobRecommendationItem]
+    recommended_reasons: dict[str, str] = Field(
+        default_factory=lambda: {
+            "skills": "Strong match with Python, React, and SQL requirements.",
+            "resume": "ATS score aligns with company recruitment standards.",
+            "interests": "Matches target role and preferred work locations."
+        }
+    )
+

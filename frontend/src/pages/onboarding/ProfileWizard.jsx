@@ -266,8 +266,8 @@ function ProfileWizard() {
         ) : (
           <>
         <p className="inline-flex rounded-sm border border-hairline px-sm py-xs text-xs font-medium uppercase tracking-[0.04em] text-body">First login setup</p>
-        <h1 className="mt-lg max-w-2xl font-display text-5xl font-semibold leading-[1.05]">Build the profile your roadmap needs.</h1>
-        <p className="mt-base max-w-2xl text-sm leading-6 text-body">This official student profile powers dashboard analytics, roadmap suggestions, internship search, resume feedback, and assistant answers.</p>
+        <h1 className="mt-lg max-w-2xl font-display text-5xl font-semibold leading-[1.05]">Build the profile your learning path needs.</h1>
+        <p className="mt-base max-w-2xl text-sm leading-6 text-body">This official student profile powers dashboard analytics, learning path suggestions, internship search, resume feedback, and assistant answers.</p>
         <div className="mt-lg grid grid-cols-5 gap-sm">
           {steps.map((label, index) => (
             <div className={`h-2 rounded-sm ${index <= step ? 'bg-primary' : 'bg-surface-strong'}`} key={label} />
@@ -279,7 +279,7 @@ function ProfileWizard() {
           {step === 0 ? (
             <div className="grid gap-base md:grid-cols-2">
               <div className="rounded-lg border border-hairline bg-surface-soft p-base text-sm text-body md:col-span-2">
-                This profile becomes the source for dashboard analytics, roadmap generation, internship filtering, and assistant context.
+                This profile becomes the source for dashboard analytics, learning path generation, internship filtering, and assistant context.
               </div>
               <Field label="First name" onChange={(value) => updateField('firstName', value)} value={form.firstName} />
               <Field label="Last name" onChange={(value) => updateField('lastName', value)} value={form.lastName} />

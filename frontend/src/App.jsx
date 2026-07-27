@@ -17,14 +17,18 @@ const Assessment = lazy(() => import('./pages/onboarding/Assessment.jsx'))
 const Results = lazy(() => import('./pages/onboarding/Results.jsx'))
 const ChoosePath = lazy(() => import('./pages/onboarding/ChoosePath.jsx'))
 const Home = lazy(() => import('./pages/dashboard/Home.jsx'))
+const CareerIntelligence = lazy(() => import('./pages/dashboard/CareerIntelligence.jsx'))
 const Roadmap = lazy(() => import('./pages/dashboard/Roadmap.jsx'))
 const Skills = lazy(() => import('./pages/dashboard/Skills.jsx'))
 const Certifications = lazy(() => import('./pages/dashboard/Certifications.jsx'))
 const Courses = lazy(() => import('./pages/dashboard/Courses.jsx'))
 const Internships = lazy(() => import('./pages/dashboard/Internships.jsx'))
+const JobRecommendations = lazy(() => import('./pages/dashboard/JobRecommendations.jsx'))
 const Resume = lazy(() => import('./pages/dashboard/Resume.jsx'))
 const Interview = lazy(() => import('./pages/dashboard/Interview.jsx'))
 const Profile = lazy(() => import('./pages/dashboard/Profile.jsx'))
+const Settings = lazy(() => import('./pages/dashboard/Settings.jsx'))
+const HelpSupport = lazy(() => import('./pages/dashboard/HelpSupport.jsx'))
 
 // Renders the route tree and returns the active page component.
 function App() {
@@ -43,14 +47,20 @@ function App() {
               <Route path="/onboarding/choose" element={<ProtectedRoute><ChoosePath /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                 <Route index element={<Home />} />
+                <Route path="intelligence" element={<CareerIntelligence />} />
                 <Route path="roadmap" element={<Roadmap />} />
+                <Route path="learning-path" element={<Roadmap />} />
                 <Route path="skills" element={<Skills />} />
+                <Route path="jobs" element={<JobRecommendations />} />
+                <Route path="placement-drives" element={<JobRecommendations />} />
                 <Route path="certifications" element={<Certifications />} />
                 <Route path="courses" element={<Courses />} />
                 <Route path="internships" element={<Internships />} />
                 <Route path="resume" element={<Resume />} />
                 <Route path="interview" element={<Interview />} />
                 <Route path="profile" element={<Profile />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="help" element={<HelpSupport />} />
               </Route>
             </Routes>
           </Suspense>

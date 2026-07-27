@@ -11,7 +11,7 @@ import { loadProfile, loadRoadmap, loadSkillProgress } from '../../services/supa
 function AIChatWidget() {
   const [open, setOpen] = useState(false)
   const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState([{ role: 'assistant', content: 'Hi! I am your AI career coach powered by Gemini. Ask me about your roadmap, skills, or resume.' }])
+  const [messages, setMessages] = useState([{ role: 'assistant', content: 'Hi! I am your AI career coach powered by Gemini. Ask me about your learning path, skills, or resume.' }])
   const [loading, setLoading] = useState(false)
   const [studentContext, setStudentContext] = useState('CareerSpark dashboard')
   const messagesEndRef = useRef(null)
@@ -150,7 +150,7 @@ function AIChatWidget() {
                 handleSend()
               }
             }}
-            placeholder="Ask about your roadmap..."
+            placeholder="Ask about your learning path..."
             value={message}
             rows={1}
           />

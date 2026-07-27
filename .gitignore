@@ -28,3 +28,7 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Local reference images and notes
+Ref-*.jpeg
+presentation.md

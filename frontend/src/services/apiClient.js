@@ -115,3 +115,13 @@ export function fetchDashboardAnalysis(payload, forceRefresh = false) {
   
   return analysisCachePromise
 }
+
+// Calls POST /intelligence/analyze with profile context and returns career intelligence data.
+export function fetchCareerIntelligence(payload) {
+  return requestJson('/intelligence/analyze', { method: 'POST', body: JSON.stringify(payload) })
+}
+
+// Calls POST /jobs/recommend with profile context and returns AI-matched job recommendations.
+export function fetchJobRecommendations(payload) {
+  return requestJson('/jobs/recommend', { method: 'POST', body: JSON.stringify(payload) })
+}
