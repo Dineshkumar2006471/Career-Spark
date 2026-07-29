@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import 'leaflet/dist/leaflet.css'
+import { registerSW } from 'virtual:pwa-register'
+
+// Register PWA Service Worker for offline support and native app installability
+registerSW({ immediate: true })
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -140,7 +140,7 @@ function DashboardLayout() {
       </div>
 
       {/* ─── Mobile Bottom Navigation ────────────────────────────────────── */}
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-hairline bg-canvas/90 backdrop-blur-md lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-hairline bg-canvas/90 backdrop-blur-md lg:hidden pb-[env(safe-area-inset-bottom)]">
         {navItems.slice(0, 4).map(([label, to, Icon]) => (
           <NavLink className={({ isActive }) => `grid place-items-center gap-xxs py-xs text-[11px] ${isActive ? 'text-primary' : 'text-body'}`} end={to === '/dashboard'} key={to} to={to}>
             <Icon aria-hidden="true" size={18} />
