@@ -9,7 +9,6 @@ import logo from '../assets/logo.png'
 import Button from '../components/ui/Button.jsx'
 import { supabase } from '../services/supabaseClient.js'
 import { useState } from 'react'
-import PublicNav from '../components/layout/PublicNav.jsx'
 
 // Renders the registration form and returns a Supabase signup flow.
 function Register() {
@@ -61,9 +60,8 @@ function Register() {
   }
 
   return (
-    <main className="min-h-screen bg-page-warm text-ink">
-      <PublicNav />
-      <section className="mx-auto grid min-h-[calc(100vh-120px)] max-w-[1120px] overflow-hidden rounded-lg border border-hairline bg-canvas md:grid-cols-[1.05fr_0.95fr]">
+    <main className="min-h-screen bg-page-warm text-ink flex items-center justify-center p-4 sm:p-8">
+      <section className="w-full grid min-h-[600px] max-w-[1120px] overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-xl md:grid-cols-[1.05fr_0.95fr]">
         <div className="flex items-center justify-center px-lg py-xl">
           <div className="w-full max-w-md">
             <Link className="inline-block" to="/">
