@@ -276,12 +276,11 @@ function JobRecommendations() {
         } catch (e) {
           console.error("Cache parse error:", e)
         }
-      }
-    }
-
+  const fetchJobs = async (forceRefetch = false) => {
     try {
-      if (forceRefresh) setRefreshing(true)
-      else setLoading(true)
+      setLoading(true)
+      if (forceRefetch) setRefreshing(true)
+
       setError(null)
 
       const [prof, rdmp, resumes] = await Promise.all([
@@ -294,6 +293,17 @@ function JobRecommendations() {
       const targetRole = getTargetRole(prof, rdmp, null)
       const resumeScore = resumes?.[0]?.ats_score || prof?.resume_feedback?.score || 75
 
+      // Make cache key dynamic to the specific profile and target role
+      const dynamicCacheKey = `${CACHE_KEY}_${prof?.id || 'default'}_${targetRole.replace(/[^a-zA-Z0-9]/g, '_')}`
+      
+      const cached = localStorage.getItem(dynamicCacheKey)
+      if (!forceRefetch && cached) {
+        setJobsData(JSON.parse(cached))
+        setLoading(false)
+        if (forceRefetch) setRefreshing(false)
+        return
+      }
+
       const payload = {
         target_role: targetRole,
         profile_skills: prof?.skills || [],
@@ -305,7 +315,7 @@ function JobRecommendations() {
 
       const res = await fetchJobRecommendations(payload)
       setJobsData(res)
-      localStorage.setItem(CACHE_KEY, JSON.stringify(res))
+      localStorage.setItem(dynamicCacheKey, JSON.stringify(res))
     } catch (err) {
       console.error("Job recommendations fetch failed:", err)
       setError(err.message || "Failed to load job recommendations. Please try again.")
