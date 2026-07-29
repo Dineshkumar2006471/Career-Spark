@@ -265,21 +265,9 @@ function JobRecommendations() {
   const [selectedSalary, setSelectedSalary] = useState('All')
 
   const fetchJobs = async (forceRefresh = false) => {
-    if (!forceRefresh) {
-      const cached = localStorage.getItem(CACHE_KEY)
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached)
-          setJobsData(parsed)
-          setLoading(false)
-          return
-        } catch (e) {
-          console.error("Cache parse error:", e)
-        }
-  const fetchJobs = async (forceRefetch = false) => {
     try {
       setLoading(true)
-      if (forceRefetch) setRefreshing(true)
+      if (forceRefresh) setRefreshing(true)
 
       setError(null)
 
@@ -297,11 +285,16 @@ function JobRecommendations() {
       const dynamicCacheKey = `${CACHE_KEY}_${prof?.id || 'default'}_${targetRole.replace(/[^a-zA-Z0-9]/g, '_')}`
       
       const cached = localStorage.getItem(dynamicCacheKey)
-      if (!forceRefetch && cached) {
-        setJobsData(JSON.parse(cached))
-        setLoading(false)
-        if (forceRefetch) setRefreshing(false)
-        return
+      if (!forceRefresh && cached) {
+        try {
+          const parsed = JSON.parse(cached)
+          setJobsData(parsed)
+          setLoading(false)
+          if (forceRefresh) setRefreshing(false)
+          return
+        } catch (e) {
+          console.error("Cache parse error:", e)
+        }
       }
 
       const payload = {
