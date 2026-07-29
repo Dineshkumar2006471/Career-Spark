@@ -74,6 +74,13 @@ Score the resume using this point-based system (total = 100 points):
    - Full consistency = 10 points. Each inconsistency = -3 points.
 </scoring_rubric>
 
+<sub_scores>
+Evaluate these three specific sub-scores out of 100:
+1. `grammar_score` (0-100): Spelling, grammar, use of strong action verbs, and professional tone.
+2. `keyword_score` (0-100): Density and relevance of "{target_role}" specific keywords.
+3. `formatting_score` (0-100): Readability, bullet point structure, and ATS parsability.
+</sub_scores>
+
 <extraction_rules>
 Extract the following as clean arrays of strings:
 - `extracted_skills`: Every technical and soft skill mentioned anywhere in the resume.
@@ -81,6 +88,7 @@ Extract the following as clean arrays of strings:
 - `extracted_education`: Each education entry as "Degree — Institution — Year" format.
 - `extracted_experience`: Each work experience as "Role — Company — Duration — Key achievement" format.
 - `profile_summary`: A 2-3 sentence professional summary of the candidate based on the resume content.
+- `strengths`: A list of 3-4 short, specific sentences highlighting the strongest areas or impressive aspects of this resume (e.g., "Excellent use of quantified metrics in projects", "Clear and ATS-friendly section formatting").
 </extraction_rules>
 
 <suggestion_rules>
@@ -94,7 +102,11 @@ Provide 3-5 highly specific, actionable suggestions to improve this resume for t
     # Empty fallback in case of absolute failure
     fallback_json = json.dumps({
         "score": 0,
+        "grammar_score": 0,
+        "keyword_score": 0,
+        "formatting_score": 0,
         "suggestions": ["Failed to analyze resume with AI. Please try again."],
+        "strengths": [],
         "extracted_text": raw_text[:5000],
         "extracted_skills": [],
         "extracted_projects": [],

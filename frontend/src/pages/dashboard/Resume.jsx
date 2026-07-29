@@ -73,11 +73,11 @@ function Resume() {
     if (file) handleFile(file)
   }
 
-  // Derive Mock Sub-Scores as per UI Reference
+  // Use Real Scores from Backend AI
   const atsScore = result?.score || 0
-  const grammarScore = result ? Math.min(100, Math.round(atsScore * 0.95 + 4)) : 0
-  const keywordScore = result ? Math.min(100, Math.round(atsScore * 0.98 + 2)) : 0
-  const formattingScore = result ? Math.min(100, Math.round(atsScore * 0.92 + 5)) : 0
+  const grammarScore = result?.grammar_score || 0
+  const keywordScore = result?.keyword_score || 0
+  const formattingScore = result?.formatting_score || 0
 
   return (
     <div className="space-y-6 pb-12">
@@ -192,40 +192,28 @@ function Resume() {
           </div>
         </div>
 
-        {/* Mock Document Preview */}
-        <div className="rounded-3xl bg-[#E8EAFC] border border-[#D0D4F7] p-8 flex items-center justify-center min-h-[340px] shadow-inner relative overflow-hidden">
-           {/* Abstract Resume Graphic */}
-           <div className={`w-full max-w-[240px] aspect-[1/1.4] bg-white shadow-xl rounded-md p-6 flex flex-col gap-5 transition-all duration-700 ${result ? 'opacity-100 scale-100' : 'opacity-40 scale-95 grayscale'}`}>
-             <div className="flex justify-between items-start">
-                <h4 className="font-black text-ink text-2xl tracking-tighter">RESUME</h4>
-                <div className="h-8 w-8 bg-surface-strong rounded-full"></div>
-             </div>
-             
-             <div className="h-0.5 w-full bg-hairline rounded-sm"></div>
-             
-             {/* Bio Section */}
-             <div className="space-y-2 mt-2">
-               <div className="h-1.5 w-16 bg-[#5A67D8]/60 rounded-sm"></div>
-               <div className="h-1.5 w-full bg-surface-strong rounded-sm"></div>
-               <div className="h-1.5 w-full bg-surface-strong rounded-sm"></div>
-               <div className="h-1.5 w-3/4 bg-surface-strong rounded-sm"></div>
-             </div>
-             
-             {/* Experience Section */}
-             <div className="space-y-2 mt-4">
-               <div className="h-1.5 w-20 bg-[#5A67D8]/60 rounded-sm"></div>
-               <div className="h-1.5 w-full bg-surface-strong rounded-sm"></div>
-               <div className="h-1.5 w-full bg-surface-strong rounded-sm"></div>
-               <div className="h-1.5 w-5/6 bg-surface-strong rounded-sm"></div>
-             </div>
-             
-             {/* Education Section */}
-             <div className="space-y-2 mt-4">
-               <div className="h-1.5 w-12 bg-[#5A67D8]/60 rounded-sm"></div>
-               <div className="h-1.5 w-full bg-surface-strong rounded-sm"></div>
-               <div className="h-1.5 w-1/2 bg-surface-strong rounded-sm"></div>
-             </div>
-           </div>
+        {/* Strengths & Highlights (Replaced Mock Document) */}
+        <div className="rounded-3xl bg-indigo-50/80 border border-indigo-100/50 p-8 shadow-inner min-h-[340px]">
+          <h3 className="font-display font-bold text-indigo-900 text-lg mb-6">Strengths & Highlights</h3>
+          <div className="space-y-5">
+            {result && result.strengths && result.strengths.length > 0 ? (
+              result.strengths.map((text, i) => (
+                <div key={i} className="flex items-start gap-3 animate-in fade-in slide-in-from-right-4 duration-500" style={{ animationDelay: `${i * 150}ms`, animationFillMode: 'both' }}>
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-indigo-600"></div>
+                  <p className="text-[15px] text-indigo-950 font-medium leading-relaxed">
+                    {text.replace(/^.*?:/, '').trim()}
+                  </p>
+                </div>
+              ))
+            ) : result ? (
+              <p className="text-sm text-indigo-900/60 font-medium">No specific highlights extracted.</p>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-48 text-center opacity-50">
+                <FileText size={48} className="text-indigo-900/40 mb-4" />
+                <p className="text-sm text-indigo-900/60 font-medium">Upload your resume to see<br/>what you did excellent.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -101,7 +101,11 @@ class ResumeAnalyzeRequest(BaseModel):
 
 class ResumeAnalyzeResponse(BaseModel):
     score: int
+    grammar_score: int = 0
+    keyword_score: int = 0
+    formatting_score: int = 0
     suggestions: list[str]
+    strengths: list[str] = Field(default_factory=list)
     extracted_text: str | None = None
     extracted_skills: list[str] = Field(default_factory=list)
     extracted_projects: list[str] = Field(default_factory=list)
