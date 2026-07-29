@@ -370,6 +370,24 @@ function JobRecommendations() {
     )
   }
 
+  if (error && !jobsData) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center space-y-4 px-4 text-center">
+        <div className="h-12 w-12 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-2 border border-red-100">
+          <Briefcase size={24} />
+        </div>
+        <h3 className="font-display text-xl font-bold text-ink">Unable to Load AI Jobs</h3>
+        <p className="text-sm text-muted max-w-md">{error}</p>
+        <button
+          onClick={() => fetchJobs(true)}
+          className="mt-4 rounded-xl bg-primary px-6 py-2.5 text-sm font-display font-bold text-white hover:bg-primary/90 transition-all shadow-sm"
+        >
+          Try Again
+        </button>
+      </div>
+    )
+  }
+
   const reasons = jobsData?.recommended_reasons || {
     skills: "Strong match with your core technical skills and projects.",
     resume: "ATS resume structure aligns with hiring standards.",
