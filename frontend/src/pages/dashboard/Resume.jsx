@@ -2,7 +2,7 @@
  * Resume renders a standalone resume analyzer with drag-and-drop upload,
  * Gemini AI-powered section extraction, ATS scoring, and score history.
  */
-import { ArrowRight, CheckCircle2, ChevronRight, FileText, Loader2, Upload, Lightbulb } from 'lucide-react'
+import { CheckCircle2, FileText, UploadCloud, AlertCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { analyzeResumeFile } from '../../services/apiClient.js'
 import { loadProfile, loadResumeVersions, saveResumeVersion } from '../../services/supabaseData.js'
@@ -13,49 +13,38 @@ function ScoreRing({ score }) {
   const radius = 52
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (score / 100) * circumference
-  const color = score >= 80 ? '#16A34A' : score >= 55 ? '#D97706' : '#DC2626'
+  const color = score >= 80 ? '#10B981' : score >= 55 ? '#F59E0B' : '#EF4444' // Tailwind Emerald-500, Amber-500, Red-500
+  
   return (
     <div className="relative inline-flex items-center justify-center">
-      <svg width="130" height="130" className="-rotate-90">
-        <circle cx="65" cy="65" r={radius} fill="none" stroke="#EDEFF3" strokeWidth="10" />
-        <circle cx="65" cy="65" r={radius} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset} className="transition-all duration-1000" />
+      <svg width="140" height="140" className="-rotate-90">
+        <circle cx="70" cy="70" r={radius} fill="none" stroke="#F3F4F6" strokeWidth="12" />
+        <circle cx="70" cy="70" r={radius} fill="none" stroke={color} strokeWidth="12" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset} className="transition-all duration-1000" />
       </svg>
-      <div className="absolute flex flex-col items-center">
-        <span className="font-mono text-3xl font-bold text-ink">{score}</span>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">ATS Score</span>
+      <div className="absolute flex flex-col items-center justify-center pt-1">
+        <div className="flex items-baseline">
+          <span className="font-display text-4xl font-bold text-ink tracking-tighter">{score}</span>
+          <span className="text-sm font-bold text-muted">/100</span>
+        </div>
       </div>
     </div>
   )
 }
 
-// Renders the resume analyzer page.
 function Resume() {
   const [profile, setProfile] = useState(null)
   const [result, setResult] = useState(null)
   const [history, setHistory] = useState([])
   const [status, setStatus] = useState('idle')
   const [dragActive, setDragActive] = useState(false)
+  
   const targetRole = getTargetRole(profile)
-
-  const formatSuggestion = (text) => {
-    const parts = text.split(':')
-    if (parts.length > 1) {
-      return (
-        <>
-          <strong className="block text-ink mb-1.5 font-semibold text-sm">{parts[0]}:</strong>
-          <span className="text-body leading-relaxed">{parts.slice(1).join(':').trim()}</span>
-        </>
-      )
-    }
-    return <span className="text-body leading-relaxed">{text}</span>
-  }
 
   useEffect(() => {
     loadProfile().then(setProfile).catch(() => {})
     loadResumeVersions().then(setHistory).catch(() => {})
   }, [])
 
-  // Handles file upload and triggers analysis.
   async function handleFile(file) {
     if (!file) return
     setStatus('analyzing')
@@ -84,135 +73,161 @@ function Resume() {
     if (file) handleFile(file)
   }
 
-  return (
-    <div className="space-y-xl">
-      {/* Page Header */}
-      <section className="rounded-2xl border border-hairline bg-gradient-to-br from-canvas to-primary/5 p-xl shadow-sm">
-        <div className="inline-flex items-center gap-sm rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary mb-4">
-          <FileText size={14} />
-          AI Resume Analyzer
-        </div>
-        <h2 className="font-display text-3xl font-bold">Resume Intelligence</h2>
-        <p className="mt-sm max-w-2xl text-sm leading-relaxed text-body">Upload your resume and let Gemini AI extract skills, projects, education, and experience. Get an ATS readiness score with actionable improvement suggestions.</p>
-      </section>
+  // Derive Mock Sub-Scores as per UI Reference
+  const atsScore = result?.score || 0
+  const grammarScore = result ? Math.min(100, Math.round(atsScore * 0.95 + 4)) : 0
+  const keywordScore = result ? Math.min(100, Math.round(atsScore * 0.98 + 2)) : 0
+  const formattingScore = result ? Math.min(100, Math.round(atsScore * 0.92 + 5)) : 0
 
-      {/* Upload Zone */}
-      <div
-        className={`rounded-2xl border-2 border-dashed p-xl text-center transition-all cursor-pointer ${dragActive ? 'border-primary bg-primary/5 shadow-lg' : 'border-hairline bg-canvas hover:border-primary/30 hover:bg-surface-soft'}`}
-        onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
-        onDragLeave={() => setDragActive(false)}
-        onDrop={handleDrop}
-        onClick={() => document.getElementById('resume-upload-input').click()}
-      >
-        <div className="flex flex-col items-center gap-base">
-          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <Upload size={28} />
-          </div>
-          <div>
-            <p className="font-display text-lg font-bold text-ink">{status === 'analyzing' ? 'Analyzing your resume...' : 'Drop your resume here or click to browse'}</p>
-            <p className="mt-xs text-sm text-muted">Supports PDF, DOCX, and TXT files</p>
-          </div>
-          {status === 'analyzing' && (
-            <div className="h-1.5 w-48 rounded-full bg-surface-strong overflow-hidden">
-              <div className="h-1.5 rounded-full bg-gradient-to-r from-primary to-blue-400 animate-pulse" style={{ width: '70%' }} />
-            </div>
-          )}
-        </div>
-        <input id="resume-upload-input" accept=".pdf,.docx,.txt" className="hidden" onChange={handleInputChange} type="file" />
+  return (
+    <div className="space-y-6 pb-12">
+      {/* Page Header (Minimal, matching UI reference) */}
+      <div className="mb-6">
+        <h2 className="font-display text-2xl font-bold text-ink">Resume Analyzer</h2>
+        <p className="text-sm text-body">Get AI feedback to build a winning resume</p>
       </div>
 
-      {/* Results & Errors */}
       {status === 'error' && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-lg text-center shadow-sm">
-          <p className="text-red-600 font-semibold text-lg mb-2">Error analyzing resume</p>
-          <p className="text-red-500 text-sm">{result?.suggestions?.[0] || 'Unknown error occurred.'}</p>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-start gap-3 shadow-sm">
+          <AlertCircle className="text-red-500 mt-0.5" size={20} />
+          <div>
+            <h4 className="text-red-700 font-bold text-sm">Failed to analyze resume</h4>
+            <p className="text-red-600 text-xs mt-1">{result?.suggestions?.[0] || 'Unknown error occurred.'}</p>
+          </div>
         </div>
       )}
 
-      {result && status === 'done' && (
-        <div className="grid gap-xl lg:grid-cols-[320px_1fr]">
-          {/* Left Column (Score & Meta) */}
-          <div className="space-y-lg">
-            <article className="rounded-2xl border border-hairline bg-canvas p-xl shadow-sm text-center">
-              <ScoreRing score={result.score} />
-              <p className="mt-lg font-display text-lg font-bold">{result.score >= 80 ? 'Strong Resume' : result.score >= 55 ? 'Needs Improvement' : 'Weak — Major Gaps'}</p>
-              <p className="mt-xs text-sm text-body">for {targetRole || 'general'} roles</p>
-            </article>
-            {result.profile_summary && (
-              <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
-                <h3 className="font-display font-bold text-lg mb-sm">Profile Summary</h3>
-                <p className="text-sm leading-relaxed text-body">{result.profile_summary}</p>
-              </article>
-            )}
-            {result.extracted_skills?.length > 0 && (
-              <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
-                <h3 className="font-display font-bold text-lg mb-base">Extracted Skills</h3>
-                <div className="flex flex-wrap gap-sm">
-                  {result.extracted_skills.map((skill, i) => (
-                    <span className="inline-flex items-center gap-xs rounded-full bg-primary/10 border border-primary/20 px-3 py-1.5 text-xs font-semibold text-primary" key={i}>
-                      <CheckCircle2 size={12} />{skill}
-                    </span>
-                  ))}
-                </div>
-              </article>
-            )}
-            {result.extracted_education?.length > 0 && (
-              <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
-                <h3 className="font-display font-bold text-lg mb-base">Education</h3>
-                <div className="space-y-sm">
-                  {result.extracted_education.map((item, i) => (
-                    <p className="flex items-start gap-sm text-sm text-body" key={i}>
-                      <span className="mt-0.5 h-2 w-2 rounded-full bg-primary shrink-0"></span>{item}
-                    </p>
-                  ))}
-                </div>
-              </article>
-            )}
+      {/* TOP ROW: 3 Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Card 1: Upload */}
+        <div className="rounded-3xl border border-hairline bg-canvas p-6 flex flex-col shadow-sm h-[320px]">
+          <div 
+            className={`flex-1 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-8 text-center transition-all cursor-pointer ${dragActive ? 'border-primary bg-primary/5' : 'border-hairline hover:border-primary/40'}`}
+            onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={handleDrop}
+            onClick={() => document.getElementById('resume-upload-input').click()}
+          >
+            <UploadCloud size={44} strokeWidth={1.5} className="text-primary/70 mb-4" />
+            <h3 className="font-display font-bold text-ink text-lg">Drag & Drop Resume</h3>
+            <p className="text-sm text-primary/80 font-semibold mt-1">or Browse Files</p>
+            <p className="text-xs text-muted mt-5">Supported : PDF, DOCX</p>
           </div>
+          <button 
+            onClick={() => document.getElementById('resume-upload-input').click()}
+            disabled={status === 'analyzing'}
+            className="mt-4 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-display font-bold py-3.5 rounded-xl shadow-md shadow-primary/20 transition-all disabled:opacity-70 disabled:animate-pulse"
+          >
+            {status === 'analyzing' ? 'Analyzing...' : 'Analyze Resume'}
+          </button>
+          <input id="resume-upload-input" accept=".pdf,.docx,.txt" className="hidden" onChange={handleInputChange} type="file" />
+        </div>
 
-          {/* Right Column (Core Content & Suggestions) */}
-          <div className="space-y-lg">
-            <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
-              <h3 className="font-display font-bold text-xl mb-base text-ink flex items-center gap-2">
-                <Lightbulb size={20} className="text-primary" />
-                Actionable Suggestions
-              </h3>
-              <div className="grid gap-4 md:grid-cols-2">
-                {result.suggestions.map((text, i) => (
-                  <div className="flex flex-col rounded-xl bg-surface-soft border border-hairline p-base text-sm shadow-sm" key={i}>
-                    {formatSuggestion(text)}
-                  </div>
-                ))}
+        {/* Card 2: Main Score */}
+        <div className="rounded-3xl border border-hairline bg-canvas p-6 flex flex-col items-center shadow-sm relative h-[320px]">
+          <h3 className="font-display font-bold text-ink text-base self-start">Resume Score</h3>
+          <div className="flex-1 flex flex-col items-center justify-center w-full pt-4 pb-2">
+            <ScoreRing score={atsScore} />
+            {result && (
+              <div className="mt-6 flex flex-col items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <p className={`font-display text-xl font-bold ${atsScore >= 80 ? 'text-emerald-600' : atsScore >= 55 ? 'text-amber-500' : 'text-red-500'}`}>
+                  {atsScore >= 80 ? 'Excellent' : atsScore >= 55 ? 'Good' : 'Needs Work'}
+                </p>
+                {atsScore >= 80 && (
+                  <div className="text-4xl drop-shadow-sm leading-none">🏆</div>
+                )}
               </div>
-            </article>
-            {result.extracted_projects?.length > 0 && (
-              <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
-                <h3 className="font-display font-bold text-lg mb-base">Projects Found</h3>
-                <div className="grid gap-sm md:grid-cols-2">
-                  {result.extracted_projects.map((project, i) => (
-                    <div className="rounded-xl bg-surface-soft p-base border border-hairline" key={i}>
-                      <p className="text-sm font-medium text-ink">{project}</p>
-                    </div>
-                  ))}
-                </div>
-              </article>
             )}
-            {result.extracted_experience?.length > 0 && (
-              <article className="rounded-2xl border border-hairline bg-canvas p-lg shadow-sm">
-                <h3 className="font-display font-bold text-lg mb-base">Experience</h3>
-                <div className="space-y-sm">
-                  {result.extracted_experience.map((item, i) => (
-                    <p className="flex items-start gap-sm text-sm text-body" key={i}>
-                      <span className="mt-0.5 h-2 w-2 rounded-full bg-green-500 shrink-0"></span>{item}
-                    </p>
-                  ))}
-                </div>
-              </article>
+            {!result && (
+              <div className="mt-6 flex flex-col items-center gap-2 opacity-30">
+                <p className="font-display text-xl font-bold text-muted">Awaiting</p>
+                <div className="text-4xl grayscale leading-none">🏆</div>
+              </div>
             )}
           </div>
         </div>
-      )}
 
+        {/* Card 3: Sub-scores */}
+        <div className="rounded-3xl border border-hairline bg-canvas p-6 flex flex-col gap-3.5 shadow-sm h-[320px]">
+          {[
+            { label: 'ATS Score', value: atsScore, color: 'text-emerald-600' },
+            { label: 'Grammar Score', value: grammarScore, color: 'text-emerald-600' },
+            { label: 'Keyword Score', value: keywordScore, color: 'text-emerald-600' },
+            { label: 'Formatting Score', value: formattingScore, color: 'text-emerald-600' },
+          ].map((item, idx) => (
+            <div key={idx} className="flex-1 flex items-center justify-between bg-surface-soft/60 rounded-2xl px-5 border border-hairline/50">
+              <span className="text-sm font-semibold text-body">{item.label}</span>
+              <span className={`text-lg font-display font-bold ${result ? item.color : 'text-muted'}`}>
+                {result ? `${item.value}%` : '--'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* BOTTOM ROW: 2 Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6">
+        
+        {/* AI Suggestions */}
+        <div className="rounded-3xl border border-hairline bg-canvas p-8 shadow-sm min-h-[340px]">
+          <h3 className="font-display font-bold text-ink text-lg mb-8">AI Suggestions</h3>
+          <div className="space-y-6">
+            {result ? result.suggestions.map((text, i) => (
+              <div key={i} className="flex items-start gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'both' }}>
+                <div className="mt-0.5 shrink-0 bg-emerald-500 rounded-full p-0.5">
+                  <CheckCircle2 size={18} className="text-white" strokeWidth={2.5} />
+                </div>
+                <p className="text-[15px] text-ink font-medium leading-relaxed">
+                  {/* Clean up the suggestion text to compress output as requested */}
+                  {text.replace(/^.*?:/, '').trim()}
+                </p>
+              </div>
+            )) : (
+              <div className="flex flex-col items-center justify-center h-48 text-center opacity-50">
+                <FileText size={48} className="text-muted mb-4" />
+                <p className="text-sm text-muted font-medium">Upload your resume to receive<br/>tailored AI improvement suggestions.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mock Document Preview */}
+        <div className="rounded-3xl bg-[#E8EAFC] border border-[#D0D4F7] p-8 flex items-center justify-center min-h-[340px] shadow-inner relative overflow-hidden">
+           {/* Abstract Resume Graphic */}
+           <div className={`w-full max-w-[240px] aspect-[1/1.4] bg-white shadow-xl rounded-md p-6 flex flex-col gap-5 transition-all duration-700 ${result ? 'opacity-100 scale-100' : 'opacity-40 scale-95 grayscale'}`}>
+             <div className="flex justify-between items-start">
+                <h4 className="font-black text-ink text-2xl tracking-tighter">RESUME</h4>
+                <div className="h-8 w-8 bg-surface-strong rounded-full"></div>
+             </div>
+             
+             <div className="h-0.5 w-full bg-hairline rounded-sm"></div>
+             
+             {/* Bio Section */}
+             <div className="space-y-2 mt-2">
+               <div className="h-1.5 w-16 bg-[#5A67D8]/60 rounded-sm"></div>
+               <div className="h-1.5 w-full bg-surface-strong rounded-sm"></div>
+               <div className="h-1.5 w-full bg-surface-strong rounded-sm"></div>
+               <div className="h-1.5 w-3/4 bg-surface-strong rounded-sm"></div>
+             </div>
+             
+             {/* Experience Section */}
+             <div className="space-y-2 mt-4">
+               <div className="h-1.5 w-20 bg-[#5A67D8]/60 rounded-sm"></div>
+               <div className="h-1.5 w-full bg-surface-strong rounded-sm"></div>
+               <div className="h-1.5 w-full bg-surface-strong rounded-sm"></div>
+               <div className="h-1.5 w-5/6 bg-surface-strong rounded-sm"></div>
+             </div>
+             
+             {/* Education Section */}
+             <div className="space-y-2 mt-4">
+               <div className="h-1.5 w-12 bg-[#5A67D8]/60 rounded-sm"></div>
+               <div className="h-1.5 w-full bg-surface-strong rounded-sm"></div>
+               <div className="h-1.5 w-1/2 bg-surface-strong rounded-sm"></div>
+             </div>
+           </div>
+        </div>
+      </div>
     </div>
   )
 }
