@@ -117,7 +117,7 @@ function DashboardLayout() {
       </aside>
 
       {/* ─── Main Content Area ───────────────────────────────────────────── */}
-      <div className="flex h-full min-w-0 flex-col pb-24 lg:pb-0">
+      <div className="flex h-full min-h-0 min-w-0 flex-col pb-24 lg:pb-0">
         <header className="z-10 shrink-0 border-b border-hairline bg-canvas">
           <div className="mx-auto flex h-[72px] max-w-[1180px] items-center justify-between gap-lg px-lg">
             <h1 className="font-display text-2xl font-semibold text-ink">{getTitle(pathname)}</h1>
