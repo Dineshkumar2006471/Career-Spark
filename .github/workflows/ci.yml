@@ -45,3 +45,7 @@ jobs:
       run: |
         cd frontend
         npm run test -- --run || echo "No tests configured yet, but Vitest ran successfully."
+    - name: Run Build
+      run: |
+        cd frontend
+        npm run build

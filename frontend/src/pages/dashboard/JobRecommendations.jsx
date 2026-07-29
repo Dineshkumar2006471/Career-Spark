@@ -391,10 +391,12 @@ function JobRecommendations() {
     )
   }
 
+  const currentTargetRole = profile?.target_role || JSON.parse(localStorage.getItem('careerspark_path') || '{}')?.title || 'your targeted roles'
+
   const reasons = jobsData?.recommended_reasons || {
-    skills: "Strong match with your core technical skills and projects.",
+    skills: `Strong match with your core technical skills and projects for ${currentTargetRole}.`,
     resume: "ATS resume structure aligns with hiring standards.",
-    interests: "Matches your target career path and preferred work mode."
+    interests: `Highly aligned with ${currentTargetRole} roles and flexible work mode preferences.`
   }
 
   return (

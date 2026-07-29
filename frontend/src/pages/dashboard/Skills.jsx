@@ -32,7 +32,7 @@ function PieChart({ categories }) {
   const cx = 120
   const cy = 120
   const rOuter = 100
-  const rInner = 32 // sleek center hole for modern donut/pie hybrid look
+  const rInner = 54 // sleek center hole for modern donut/pie hybrid look
   const avgScore = Math.round(totalScore / categories.length)
 
   let currentAngle = 0

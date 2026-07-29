@@ -118,29 +118,21 @@ const CACHE_KEY = 'careerspark_intelligence_cache'
 // Renders the Career Intelligence page.
 function CareerIntelligence() {
   // Try to restore cached data so returning to this page is instant
-  const [data, setData] = useState(() => {
-    try {
-      const cached = localStorage.getItem(CACHE_KEY)
-      if (cached) return JSON.parse(cached)
-    } catch {}
-    return FALLBACK
-  })
-  const [loading, setLoading] = useState(false)
-  const [loaded, setLoaded] = useState(() => Boolean(localStorage.getItem(CACHE_KEY)))
+  const [data, setData] = useState(FALLBACK)
+  const [loading, setLoading] = useState(true)
+  const [loaded, setLoaded] = useState(false)
   const [error, setError] = useState(null)
   const hasAutoFetched = useRef(false)
 
-  // Auto-fetch only once per session and only if there is no cache
+  // Auto-fetch only once per session
   useEffect(() => {
     if (hasAutoFetched.current) return
     hasAutoFetched.current = true
-    const cached = localStorage.getItem(CACHE_KEY)
-    if (cached) return // already have data — skip the popup
-    runAnalysis()
+    runAnalysis(false)
   }, [])
 
   // Called on first load (no cache) or when user clicks "Refresh Analysis"
-  async function runAnalysis() {
+  async function runAnalysis(forceRefresh = true) {
     setLoading(true)
     setError(null)
     try {
@@ -156,6 +148,18 @@ function CareerIntelligence() {
         ...(skills || []).map(s => s.skill_name || s.name).filter(Boolean),
       ]
 
+      const dynamicCacheKey = `${CACHE_KEY}_${profile?.id || 'default'}_${targetRole.replace(/[^a-zA-Z0-9]/g, '_')}`
+
+      if (!forceRefresh) {
+        const cached = localStorage.getItem(dynamicCacheKey)
+        if (cached) {
+          setData(JSON.parse(cached))
+          setLoaded(true)
+          setLoading(false)
+          return
+        }
+      }
+
       const payload = {
         target_role: targetRole,
         profile_skills: profileSkills,
@@ -168,8 +172,8 @@ function CareerIntelligence() {
       const result = await fetchCareerIntelligence(payload)
       setData(result)
       setLoaded(true)
-      // Persist to localStorage so navigating away and back is instant
-      try { localStorage.setItem(CACHE_KEY, JSON.stringify(result)) } catch {}
+      // Persist to localStorage so navigating away and back is instant for this role
+      try { localStorage.setItem(dynamicCacheKey, JSON.stringify(result)) } catch {}
     } catch (err) {
       console.error('Career Intelligence fetch error:', err)
       setError(err.message || 'Failed to load career intelligence')
