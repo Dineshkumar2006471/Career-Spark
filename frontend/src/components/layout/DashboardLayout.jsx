@@ -126,7 +126,6 @@ function DashboardLayout() {
                 <Search aria-hidden="true" size={18} />
                 <span className="flex-1 text-left">Search learning path, skills, internships...</span>
               </div>
-              <ThemeToggle />
               <UserNavMenu />
             </div>
           </div>

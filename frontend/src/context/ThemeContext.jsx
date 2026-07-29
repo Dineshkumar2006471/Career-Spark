@@ -3,13 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    // Check localStorage or system preference on initial load
-    const saved = localStorage.getItem('career-spark-theme')
-    if (saved) return saved
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark'
-    return 'light'
-  })
+  const [theme, setTheme] = useState('light')
 
   useEffect(() => {
     const root = window.document.documentElement

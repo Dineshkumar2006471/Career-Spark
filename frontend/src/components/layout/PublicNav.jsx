@@ -5,7 +5,6 @@
 import { Link } from 'react-router-dom'
 import Button from '../ui/Button.jsx'
 import UserNavMenu from './UserNavMenu.jsx'
-import ThemeToggle from '../ui/ThemeToggle.jsx'
 import { useAuth } from '../../context/authState.js'
 import logo from '../../assets/logo.png'
 
@@ -36,14 +35,12 @@ function PublicNav() {
 
         {auth?.user ? (
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             <UserNavMenu />
           </div>
         ) : (
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button to="/login" variant="text" className="hidden px-3 text-sm font-semibold text-ink sm:inline-flex hover:text-primary transition-colors">Log in</Button>
-            <Button to="/register" className="bg-ink text-white hover:bg-primary shadow-md hover:shadow-lg hover:-translate-y-0.5 rounded-full px-6 py-2.5 text-sm font-bold transition-all">
+            <Button to="/register" className="bg-ink text-white hover:bg-primary shadow-md hover:shadow-lg hover:-translate-y-0.5 rounded-full px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all whitespace-nowrap">
               Start free ➔
             </Button>
           </div>
