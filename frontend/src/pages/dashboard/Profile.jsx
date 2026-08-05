@@ -2,17 +2,34 @@
  * Profile renders the student's read-only identity card.
  * It exists to confirm what CareerSpark knows about the student from the onboarding wizard.
  */
-import { BookOpen, Briefcase, GraduationCap, Link2, MapPin, Target, Trophy, Zap } from 'lucide-react'
+import { BookOpen, Briefcase, GraduationCap, Link2, MapPin, Target, Trophy, Zap, Pencil } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { loadProfile } from '../../services/supabaseData.js'
+import { loadProfile, uploadAvatar, updateAvatarUrl } from '../../services/supabaseData.js'
 
 function Profile() {
   const [profile, setProfile] = useState(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     loadProfile().then(setProfile).catch(() => {})
   }, [])
+
+  async function handleAvatarChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      setUploading(true)
+      const url = await uploadAvatar(file)
+      await updateAvatarUrl(url)
+      setProfile({ ...profile, avatar_url: url })
+      window.dispatchEvent(new CustomEvent('profileAvatarChanged'))
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setUploading(false)
+    }
+  }
 
   if (!profile) return <div className="p-xl text-center text-body">Loading profile...</div>
 
@@ -27,13 +44,21 @@ function Profile() {
         <div className="h-32 bg-gradient-to-r from-primary/80 to-blue-500"></div>
         <div className="px-xl pb-xl relative">
           <div className="flex justify-between items-end mb-lg">
-            <div className="h-24 w-24 rounded-2xl border-4 border-canvas bg-gradient-to-br from-primary to-blue-400 -mt-12 shadow-md flex items-center justify-center text-3xl font-bold text-white overflow-hidden">
+            <label className="relative h-24 w-24 rounded-2xl border-4 border-canvas bg-gradient-to-br from-primary to-blue-400 -mt-12 shadow-md flex items-center justify-center text-3xl font-bold text-white overflow-hidden cursor-pointer group">
+              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} disabled={uploading} />
               {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
+                <img src={profile.avatar_url} alt="Profile" className={`h-full w-full object-cover transition-opacity ${uploading ? 'opacity-50' : 'opacity-100'}`} />
               ) : (
                 initials
               )}
-            </div>
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                {uploading ? (
+                  <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Pencil size={20} className="text-white" />
+                )}
+              </div>
+            </label>
             <Link className="h-10 inline-flex items-center rounded-lg border border-hairline bg-canvas px-4 text-sm font-medium text-ink hover:bg-surface-soft shadow-sm" to="/onboarding/profile?edit=1">
               Edit Profile
             </Link>

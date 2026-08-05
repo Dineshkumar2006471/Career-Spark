@@ -35,7 +35,11 @@ function UserNavMenu({ className = '' }) {
 
   useEffect(() => {
     if (!auth?.user) return
-    loadProfile().then(setProfile).catch(() => setProfile(null))
+    const fetchProfile = () => loadProfile().then(setProfile).catch(() => setProfile(null))
+    fetchProfile()
+    
+    window.addEventListener('profileAvatarChanged', fetchProfile)
+    return () => window.removeEventListener('profileAvatarChanged', fetchProfile)
   }, [auth?.user])
 
   useEffect(() => {
@@ -65,11 +69,15 @@ function UserNavMenu({ className = '' }) {
       <button
         aria-expanded={open}
         aria-label="Open profile menu"
-        className="grid h-10 w-10 place-items-center rounded-full bg-ink font-mono text-sm font-medium text-white transition-all hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+        className="grid h-10 w-10 place-items-center rounded-full bg-ink font-mono text-sm font-medium text-white transition-all hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary/20 overflow-hidden"
         onClick={() => setOpen((current) => !current)}
         type="button"
       >
-        {getInitials(profile, auth.user)}
+        {profile?.avatar_url ? (
+          <img src={profile.avatar_url} alt="User Avatar" className="h-full w-full object-cover" />
+        ) : (
+          getInitials(profile, auth.user)
+        )}
       </button>
 
       {open ? (

@@ -88,6 +88,14 @@ export async function uploadAvatar(file) {
   return data.publicUrl
 }
 
+// Updates just the avatar_url column for the current user's profile
+export async function updateAvatarUrl(url) {
+  const user = await getCurrentUser()
+  if (!user) throw new Error('Not authenticated')
+  const { error } = await supabase.from('profile').update({ avatar_url: url }).eq('user_id', user.id)
+  if (error) throw new Error(error.message)
+}
+
 // Loads the user's profile row and returns null when not found.
 export async function loadProfile() {
   const user = await getCurrentUser()
