@@ -63,9 +63,29 @@ export function saveProfile(profile) {
     github_url: profile.github,
     linkedin_url: profile.linkedin,
     portfolio_url: profile.portfolio,
+    avatar_url: profile.avatarUrl,
     onboarding_completed: true,
     updated_at: new Date().toISOString(),
   })
+}
+
+// Uploads a user avatar to the 'avatars' storage bucket and returns the public URL.
+export async function uploadAvatar(file) {
+  const user = await getCurrentUser()
+  if (!user) throw new Error('You must be logged in to upload an avatar.')
+  
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`
+  const filePath = `${user.id}/${fileName}`
+  
+  const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, {
+    cacheControl: '3600',
+    upsert: true
+  })
+  if (uploadError) throw new Error(uploadError.message)
+  
+  const { data } = supabase.storage.from('avatars').getPublicUrl(filePath)
+  return data.publicUrl
 }
 
 // Loads the user's profile row and returns null when not found.

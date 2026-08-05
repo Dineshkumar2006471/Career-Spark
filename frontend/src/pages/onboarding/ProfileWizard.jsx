@@ -35,6 +35,7 @@ const initialForm = {
   github: '',
   linkedin: '',
   portfolio: '',
+  avatarUrl: '',
   targetRole: '',
   goal: '',
 }
@@ -82,6 +83,7 @@ function ProfileWizard() {
   const [message, setMessage] = useState('')
   const [detecting, setDetecting] = useState(false)
   const [resumeStatus, setResumeStatus] = useState('')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [loading, setLoading] = useState(false)
   const [profileLoading, setProfileLoading] = useState(true)
   const editMode = searchParams.get('edit') === '1'
@@ -129,6 +131,7 @@ function ProfileWizard() {
           github: savedProfile.github_url || '',
           linkedin: savedProfile.linkedin_url || '',
           portfolio: savedProfile.portfolio_url || '',
+          avatarUrl: savedProfile.avatar_url || '',
           targetRole: savedProfile.goal_note?.match(/Target role:\s*([^|]+)/i)?.[1]?.trim() || '',
           goal: savedProfile.goal_note?.replace(/Target role:\s*[^|]+\|?\s*/i, '') || '',
         }))
@@ -144,6 +147,22 @@ function ProfileWizard() {
   // Updates a profile field and returns the next form state.
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  // Uploads avatar file to Supabase and saves the URL to form state.
+  async function handleAvatarUpload(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    try {
+      setUploadingAvatar(true)
+      const { uploadAvatar } = await import('../../services/supabaseData.js')
+      const url = await uploadAvatar(file)
+      updateField('avatarUrl', url)
+    } catch (err) {
+      alert(err.message || 'Failed to upload avatar. Make sure the avatars bucket exists.')
+    } finally {
+      setUploadingAvatar(false)
+    }
   }
 
   // Reads browser geolocation and reverse-geocodes it to populate form fields.
@@ -280,6 +299,18 @@ function ProfileWizard() {
             <div className="grid gap-base md:grid-cols-2">
               <div className="rounded-lg border border-hairline bg-surface-soft p-base text-sm text-body md:col-span-2">
                 This profile becomes the source for dashboard analytics, learning path generation, internship filtering, and assistant context.
+              </div>
+              <div className="md:col-span-2 flex flex-col sm:flex-row items-center gap-4 py-4">
+                <div className="h-20 w-20 rounded-full bg-surface flex items-center justify-center border border-hairline overflow-hidden shrink-0 shadow-sm text-xl text-primary font-bold">
+                  {form.avatarUrl ? <img src={form.avatarUrl} alt="Avatar" className="h-full w-full object-cover" /> : (form.firstName?.charAt(0) || 'U')}
+                </div>
+                <div>
+                  <label className="cursor-pointer inline-flex items-center justify-center rounded-md border border-hairline bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-surface-soft transition-colors shadow-sm">
+                    {uploadingAvatar ? 'Uploading...' : 'Upload Profile Picture'}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+                  </label>
+                  <p className="text-xs text-muted mt-2">Recommended 256x256px. Must be JPG or PNG.</p>
+                </div>
               </div>
               <Field label="First name" onChange={(value) => updateField('firstName', value)} value={form.firstName} />
               <Field label="Last name" onChange={(value) => updateField('lastName', value)} value={form.lastName} />

@@ -27,8 +27,12 @@ function Profile() {
         <div className="h-32 bg-gradient-to-r from-primary/80 to-blue-500"></div>
         <div className="px-xl pb-xl relative">
           <div className="flex justify-between items-end mb-lg">
-            <div className="h-24 w-24 rounded-2xl border-4 border-canvas bg-gradient-to-br from-primary to-blue-400 -mt-12 shadow-md flex items-center justify-center text-3xl font-bold text-white">
-              {initials}
+            <div className="h-24 w-24 rounded-2xl border-4 border-canvas bg-gradient-to-br from-primary to-blue-400 -mt-12 shadow-md flex items-center justify-center text-3xl font-bold text-white overflow-hidden">
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
+              ) : (
+                initials
+              )}
             </div>
             <Link className="h-10 inline-flex items-center rounded-lg border border-hairline bg-canvas px-4 text-sm font-medium text-ink hover:bg-surface-soft shadow-sm" to="/onboarding/profile?edit=1">
               Edit Profile
