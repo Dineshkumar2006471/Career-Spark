@@ -126,10 +126,10 @@ function Settings() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        {/* Left Column (Wider on Desktop) */}
-        <div className="lg:col-span-7 space-y-8">
+        {/* Left Column */}
+        <div className="space-y-8 flex flex-col">
           
           {/* 1. Profile Settings */}
           <SectionCard 
@@ -139,7 +139,7 @@ function Settings() {
             iconBg="bg-blue-100"
             iconColor="text-blue-600"
           >
-            <div className="flex flex-col sm:flex-row gap-6 mb-2">
+            <div className="flex flex-col xl:flex-row gap-6 mb-2">
               <div className="flex flex-col items-center gap-2">
                 <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center text-white text-2xl font-bold shadow-md">
                   {name.charAt(0)}
@@ -148,52 +148,14 @@ function Settings() {
                   <ImageIcon size={14}/> Change Picture
                 </button>
               </div>
-              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4">
+                <div className="sm:col-span-2 xl:col-span-1">
                   <InputGroup icon={User} label="Full Name" value={name} onChange={setName} />
                 </div>
                 <InputGroup icon={Mail} label="Email Address" type="email" value={email} onChange={setEmail} />
                 <InputGroup icon={Phone} label="Mobile Number" value={mobile} onChange={setMobile} />
               </div>
             </div>
-          </SectionCard>
-
-          {/* 2. Career Preferences */}
-          <SectionCard 
-            icon={Briefcase} 
-            title="Career Preferences" 
-            description="Help our AI match you with the best opportunities."
-            iconBg="bg-amber-100"
-            iconColor="text-amber-600"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputGroup icon={Target} label="Preferred Domain / Target Role" value={domain} onChange={setDomain} />
-              <InputGroup icon={MapPin} label="Preferred Location" value={location} onChange={setLocation} />
-              <InputGroup icon={DollarSign} label="Salary Expectation (LPA)" value={salary} onChange={setSalary} />
-              <InputGroup icon={Briefcase} label="Job Type" value={jobType} onChange={setJobType} />
-              <div className="sm:col-span-2">
-                <InputGroup icon={Code} label="Your Core Skills (Comma Separated)" value={skills} onChange={setSkills} />
-              </div>
-            </div>
-          </SectionCard>
-
-        </div>
-
-        {/* Right Column */}
-        <div className="lg:col-span-5 space-y-8">
-          
-          {/* 3. AI Recommendation Settings */}
-          <SectionCard 
-            icon={Sparkles} 
-            title="AI Recommendation Settings" 
-            description="Control how Gemini AI guides your career."
-            iconBg="bg-purple-100"
-            iconColor="text-purple-600"
-          >
-            <Toggle label="Enable AI Suggestions" description="Get real-time AI advice on your dashboard." checked={aiSuggestions} onChange={setAiSuggestions} />
-            <Toggle label="Personalized Learning" description="AI will curate courses based on your skill gaps." checked={personalizedLearning} onChange={setPersonalizedLearning} />
-            <Toggle label="Placement Alerts" description="AI will flag high-match job openings automatically." checked={placementAlerts} onChange={setPlacementAlerts} />
-            <Toggle label="Internship Notifications" description="Get notified about early-career internships." checked={internshipNotifs} onChange={setInternshipNotifs} />
           </SectionCard>
 
           {/* 4. Notification Settings */}
@@ -229,6 +191,44 @@ function Settings() {
                 <Trash2 size={16} /> Delete Account
               </button>
             </div>
+          </SectionCard>
+
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-8 flex flex-col">
+          
+          {/* 2. Career Preferences */}
+          <SectionCard 
+            icon={Briefcase} 
+            title="Career Preferences" 
+            description="Help our AI match you with the best opportunities."
+            iconBg="bg-amber-100"
+            iconColor="text-amber-600"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <InputGroup icon={Target} label="Preferred Domain / Target Role" value={domain} onChange={setDomain} />
+              <InputGroup icon={MapPin} label="Preferred Location" value={location} onChange={setLocation} />
+              <InputGroup icon={DollarSign} label="Salary Expectation (LPA)" value={salary} onChange={setSalary} />
+              <InputGroup icon={Briefcase} label="Job Type" value={jobType} onChange={setJobType} />
+              <div className="sm:col-span-2">
+                <InputGroup icon={Code} label="Your Core Skills (Comma Separated)" value={skills} onChange={setSkills} />
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* 3. AI Recommendation Settings */}
+          <SectionCard 
+            icon={Sparkles} 
+            title="AI Recommendation Settings" 
+            description="Control how Gemini AI guides your career."
+            iconBg="bg-purple-100"
+            iconColor="text-purple-600"
+          >
+            <Toggle label="Enable AI Suggestions" description="Get real-time AI advice on your dashboard." checked={aiSuggestions} onChange={setAiSuggestions} />
+            <Toggle label="Personalized Learning" description="AI will curate courses based on your skill gaps." checked={personalizedLearning} onChange={setPersonalizedLearning} />
+            <Toggle label="Placement Alerts" description="AI will flag high-match job openings automatically." checked={placementAlerts} onChange={setPlacementAlerts} />
+            <Toggle label="Internship Notifications" description="Get notified about early-career internships." checked={internshipNotifs} onChange={setInternshipNotifs} />
           </SectionCard>
 
         </div>
